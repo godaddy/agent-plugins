@@ -17,7 +17,7 @@ export function checkoutMode(): "demo" | "disabled" {
 }
 
 export function createDemoSession(input: CheckoutInput, products: Product[]) {
-  if (checkoutMode() !== "demo") throw new Error("Checkout is disabled in this environment.");
+  if (checkoutMode() !== "demo") throw new Error("Checkout is disabled by the current configuration.");
   if (!Array.isArray(input.lines) || input.lines.length === 0 || input.lines.length > 30) {
     throw new Error("Provide between 1 and 30 cart lines.");
   }

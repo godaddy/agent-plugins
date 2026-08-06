@@ -2,7 +2,7 @@
 
 ## Data and contracts
 
-- Confirm source mode, endpoint, environment, authenticated store, and currency.
+- Confirm the fixed production endpoints, authenticated store, and currency.
 - Confirm MCP discovery returned the called tools and current schemas.
 - Confirm application catalog/cart requests use the runtime storefront APIs, not
   the agent's MCP session or OAuth token.

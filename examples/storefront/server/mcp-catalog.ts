@@ -3,6 +3,7 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import type { Product, Variant } from "../shared/types.js";
 
 type UnknownRecord = Record<string, unknown>;
+const COMMERCE_MCP_ENDPOINT = "https://mcp.commerce.api.godaddy.com/mcp";
 
 function record(value: unknown): UnknownRecord | null {
   return value !== null && typeof value === "object" && !Array.isArray(value)
@@ -145,7 +146,6 @@ export async function loadProductsWithClient(
 }
 
 export async function loadProductsFromMcp(): Promise<Product[]> {
-  const endpoint = process.env.COMMERCE_MCP_URL ?? "https://mcp.commerce.api.godaddy.com/mcp";
   const token = process.env.COMMERCE_MCP_TOKEN;
   const storeId = process.env.COMMERCE_STORE_ID;
   if (!token || !storeId) {
@@ -153,7 +153,7 @@ export async function loadProductsFromMcp(): Promise<Product[]> {
   }
 
   const client = new Client({ name: "commerce-reference-storefront", version: "0.1.0" });
-  const transport = new StreamableHTTPClientTransport(new URL(endpoint), {
+  const transport = new StreamableHTTPClientTransport(new URL(COMMERCE_MCP_ENDPOINT), {
     requestInit: { headers: { Authorization: `Bearer ${token}` } },
   });
 

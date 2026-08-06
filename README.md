@@ -3,6 +3,8 @@
 This repository publishes one installable plugin: `commerce`. It combines a
 Storefront skill, a dedicated Payments skill, and GoDaddy Commerce's remote MCP
 server. No unrelated plugins belong in this repository or its marketplace.
+All bundled GoDaddy Commerce connections use public production endpoints; users
+do not select or configure service origins.
 
 The package supports both the vendor-neutral [Agent Plugins 1.0.0 working
 draft](https://agent-plugins.org/specification) and the native [Codex plugin

@@ -22,10 +22,11 @@ as a client-side cart feature.
    validate readiness. Use the Commerce storefront APIs through narrow
    application-owned server routes for live catalog and cart traffic. Read
    [references/architecture.md](references/architecture.md).
-4. For Commerce MCP, list core tools, call `search_tools` with the business task,
-   read the returned parameter schema, then call the discovered tool directly or
-   through `execute_tool`. Confirm the environment and `storeId`; do not guess
-   either. Read [references/mcp-workflow.md](references/mcp-workflow.md).
+4. Use the bundled production Commerce MCP connection. List core tools, call
+   `search_tools` with the business task, read the returned parameter schema,
+   then call the discovered tool directly or through `execute_tool`. Confirm the
+   `storeId`; never request or invent an endpoint override. Read
+   [references/mcp-workflow.md](references/mcp-workflow.md).
 5. For a dynamic storefront, implement the catalog, product, SKU, and draft-order
    cart routes from
    [references/runtime-api-map.md](references/runtime-api-map.md). Adapt the
@@ -72,6 +73,7 @@ as a client-side cart feature.
 
 ## Completion report
 
-State which data source and environment were used, the store and currency, the
-paths exercised, the server-side verification authority, and any unverified or
-provider-owned behavior. If only fixtures were used, say so prominently.
+State whether production Commerce or local fixtures were used, the store and
+currency, the paths exercised, the server-side verification authority, and any
+unverified or provider-owned behavior. If only fixtures were used, say so
+prominently.

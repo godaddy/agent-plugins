@@ -16,14 +16,14 @@ for correct lifecycle handling and recoverability before the happy-path demo.
    monetary transactions belong here.
 2. Inspect the existing provider integration, server framework, auth and secret
    management, data model, idempotency strategy, webhook route, logs, tests, and
-   deployment environment before creating replacements.
+   deployment configuration before creating replacements.
 3. Confirm merchant country, presentment/settlement currency, payment method,
-   capture timing, refund policy, and provider/environment. Use
+   capture timing, refund policy, and production provider eligibility. Use
    [references/provider-and-flow.md](references/provider-and-flow.md).
-4. Locate the exact approved SDK, OpenAPI, AsyncAPI, or provider documentation
-   for the operation and version. Derive request and response types from it. If a
-   write contract is absent, stop and report the operation as unsupported rather
-   than inventing fields. Read
+4. Locate the exact approved production SDK, OpenAPI, AsyncAPI, or provider
+   documentation for the operation and version. Derive request and response
+   types from it. If a write contract is absent, stop and report the operation
+   as unsupported rather than inventing fields. Read
    [references/transaction-contracts.md](references/transaction-contracts.md).
 5. For GoDaddy Commerce hosted checkout, follow the exact server-side API,
    authentication, session-input, redirect, and verification contract in
@@ -43,8 +43,9 @@ for correct lifecycle handling and recoverability before the happy-path demo.
    auditable. Fetch server-side status when a return needs immediate resolution;
    keep uncertain states pending.
 9. Verify contract tests, duplicate requests/events, retries, timeouts, partial
-   refunds, out-of-order events, and a real provider sandbox path. Use
-   [references/verification.md](references/verification.md).
+   refunds, and out-of-order events. Use production read-only or no-charge
+   readiness checks when safe. Never create a real charge merely to validate an
+   integration. Use [references/verification.md](references/verification.md).
 
 ## Non-negotiable rules
 
@@ -68,6 +69,6 @@ for correct lifecycle handling and recoverability before the happy-path demo.
 
 ## Completion report
 
-State the provider, environment, contract and version, idempotency scope,
+State the provider, production contract and version, idempotency scope,
 verification authority, states tested, and remaining operational gaps. Clearly
-distinguish a fixture simulation from provider sandbox or production evidence.
+distinguish local fixture evidence from production evidence.

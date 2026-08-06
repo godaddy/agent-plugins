@@ -6,7 +6,7 @@ cart, a same-origin checkout backend, a simulated hosted checkout, and a return
 page that asks the server for authoritative status before clearing the cart.
 
 The default is an unmistakable fixture/demo mode. It moves no money and is not
-provider sandbox evidence.
+production payment evidence.
 
 ## Run it
 
@@ -23,15 +23,15 @@ Set these only in the server environment:
 
 ```bash
 COMMERCE_DATA_MODE=mcp
-COMMERCE_MCP_URL=https://mcp.commerce.api.dev-godaddy.com/mcp
 COMMERCE_MCP_TOKEN=<short-lived OAuth token>
 COMMERCE_STORE_ID=<store id>
 ```
 
-The adapter connects server-side, calls `search_tools`, confirms the current
-schemas, and invokes the catalog search/get tools through `execute_tool`. Missing
-credentials, scopes, products, or connectivity are surfaced to the UI; the app
-does not fall back to fixtures.
+The adapter always connects to the public production Commerce MCP endpoint from
+server code, calls `search_tools`, confirms the current schemas, and invokes the
+catalog search/get tools through `execute_tool`. Missing credentials, scopes,
+products, or connectivity are surfaced to the UI; the app does not fall back to
+fixtures.
 
 Checkout remains `demo` or `disabled` because the reviewed Commerce MCP does not
 expose payment writes. A real integration should replace only the narrow

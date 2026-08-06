@@ -16,9 +16,9 @@ fixture catalog and demo checkout for deterministic verification, plus an
 opt-in server-side Commerce MCP catalog adapter. Live payment writes are
 intentionally absent until an approved provider contract is selected.
 
-Governance, official schema validation in CI, authenticated multi-client MCP
-smoke tests, provider sandbox checkout, license selection, and release ownership
-remain pre-release gates rather than implied completed work.
+Governance, official schema validation in CI, authenticated production MCP smoke
+tests, production-safe checkout verification, license selection, and release
+ownership remain pre-release gates rather than implied completed work.
 
 ## Outcome
 
@@ -48,10 +48,9 @@ specification deliberately leaves distribution and installation to clients.
    vendor-neutral `plugin.json` and `mcp.json` while also providing
    `.codex-plugin/plugin.json` and `.mcp.json`. Both formats point at the same
    `skills/` directory and production Commerce MCP server.
-4. **Start with the production MCP endpoint.** The portable package points to
-   `https://mcp.commerce.api.godaddy.com/mcp`. Development and test endpoints
-   should remain separate fixtures or client-local overrides, not hidden
-   runtime switching inside the production package.
+4. **Use only the production MCP endpoint.** The portable package points to
+   `https://mcp.commerce.api.godaddy.com/mcp`. The public plugin does not expose
+   or accept an endpoint override.
 5. **Keep authentication client-managed.** Agent Plugins 1.0.0 has no portable
    OAuth or credential-reference fields. `mcp.json` must not contain bearer
    tokens, client secrets, or an `Authorization` header. Compatible clients use
@@ -179,7 +178,8 @@ depend on another skill being loaded.
 
 ## Shared behavior to encode in skills
 
-1. Confirm the target GoDaddy environment and store before acting.
+1. Confirm the production GoDaddy store before acting; do not accept an
+   alternate service endpoint.
 2. Check the connected MCP server or API and its authentication state.
 3. In `storefront`, inspect core tools and call `search_tools` for the requested
    capability. In `payments`, inspect the approved bundled OpenAPI or AsyncAPI
@@ -206,7 +206,7 @@ depend on another skill being loaded.
   review.
 - Review existing internal skill material and generated MCP tool documentation;
   classify what may be adapted, rewritten, or must remain private.
-- Decide the support promise for production versus non-production endpoints.
+- Document the production-only support boundary.
 
 **Exit gate:** ownership, license, public-content rules, and release authority are
 documented.
@@ -310,7 +310,8 @@ Release candidates should additionally run manual or automated checks for:
 - `tools/list` and `search_tools` behavior;
 - one representative read from store, catalog, and orders;
 - one representative read-only payment transaction lookup;
-- one explicitly authorized non-production mutation with post-write verification;
+- one mutation authorization scenario with explicit consent and post-write
+  verification, without creating a real charge merely for testing;
 - graceful isolation when one skill or MCP server operation fails.
 
 ## First-release acceptance criteria

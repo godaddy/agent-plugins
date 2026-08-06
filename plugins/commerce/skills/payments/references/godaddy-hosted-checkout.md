@@ -22,7 +22,6 @@ application readiness. It does not create a shopper checkout session.
 
 Before implementation, obtain approved application-runtime configuration:
 
-- GoDaddy API base URL for the selected environment;
 - Commerce `storeId` and registered `channelId`;
 - store `currencyCode`;
 - runtime OAuth client ID and client secret;
@@ -33,18 +32,12 @@ Do not reuse the agent's interactive MCP OAuth token. A deployed application has
 its own runtime identity and lifecycle. Keep its client secret in a server secret
 store and never serialize it into browser JavaScript, HTML, logs, or error bodies.
 
-For a Node application with a current compatible `@godaddy/react` package,
-inspect `package.json` exports and installed types before coding. The current
-server helper is exposed from `@godaddy/react/server`; call it only from server
-code. Use the direct GraphQL contract below for other frameworks or when the
-approved package is unavailable.
-
 ## Authentication and endpoint
 
 Mint a short-lived token server-side:
 
 ```http
-POST {apiBaseUrl}/v2/oauth2/token
+POST https://api.godaddy.com/v2/oauth2/token
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=client_credentials&client_id=...&client_secret=...&scope=...
@@ -56,17 +49,15 @@ checkout contract. Current GoDaddy checkout helpers request
 schema rather than broadening it speculatively. Cache the token until shortly
 before `expires_in`, then refresh it.
 
-Checkout uses a dedicated GraphQL origin, not a path on `apiBaseUrl`. Derive it
-from the configured API hostname:
+Create checkout sessions through the fixed production GraphQL origin:
 
 ```text
-https://api.godaddy.com             -> https://checkout.commerce.api.godaddy.com
-https://api.dev-godaddy.com         -> https://checkout.commerce.api.dev-godaddy.com
-https://api.ote-godaddy.com         -> https://checkout.commerce.api.ote-godaddy.com
+https://checkout.commerce.api.godaddy.com
 ```
 
-Send `Authorization: Bearer <access-token>` and JSON GraphQL requests to that
-origin. Do not call the checkout origin from the browser.
+Do not add an origin setting or derive another hostname. Send `Authorization:
+Bearer <access-token>` and JSON GraphQL requests to that origin. Do not call the
+checkout origin from the browser.
 
 ## Session contract
 
@@ -258,4 +249,4 @@ After implementing the real routes:
 
 Readiness proves the implementation passed the configured runtime check. It does
 not replace per-payment status verification, webhook processing, reconciliation,
-or provider sandbox testing.
+or explicitly authorized production verification.

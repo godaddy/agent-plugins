@@ -1,7 +1,7 @@
 # Contract-driven transaction work
 
-The checked-in or officially published contract for the selected environment is
-authoritative. Confirm base URL, version, auth, scopes, idempotency header,
+The checked-in or officially published production contract is authoritative.
+Confirm the fixed production URL, version, auth, scopes, idempotency header,
 request schema, response schema, error model, pagination, and event version.
 
 For GoDaddy Payments, the currently reviewed Transactions v2 REST contract

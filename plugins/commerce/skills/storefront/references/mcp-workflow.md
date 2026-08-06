@@ -16,11 +16,14 @@ payments skill.
 ## Connection
 
 Use Streamable HTTP from the agent host or a deliberate server-side control-plane
-integration. Never initialize this client in browser code. Known endpoints are:
+integration. Never initialize this client in browser code. This public plugin is
+production-only and uses the bundled endpoint:
 
-- production: `https://mcp.commerce.api.godaddy.com/mcp`
-- development: `https://mcp.commerce.api.dev-godaddy.com/mcp`
-- local service: `http://localhost:5001/mcp`
+```text
+https://mcp.commerce.api.godaddy.com/mcp
+```
+
+Do not prompt for, accept, derive, or publish an alternate Commerce MCP endpoint.
 
 Let the MCP client perform OAuth discovery or inject a short-lived token from a
 server-side secret store. Never serialize that token into HTML or JavaScript.
