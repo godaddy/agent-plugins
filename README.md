@@ -16,11 +16,29 @@ examples/storefront                 runnable reference implementation
 
 ## Install in Codex
 
-Add a checkout of this repository as the GoDaddy marketplace, then install its
-only plugin:
+Add the GitHub repository directly as the GoDaddy marketplace, then install its
+only plugin. A local clone is not required:
 
 ```bash
-codex plugin marketplace add /absolute/path/to/agent-plugins
+codex plugin marketplace add https://github.com/godaddy/agent-plugins.git
+codex plugin add commerce@godaddy
+```
+
+Codex clones and tracks the marketplace in its own plugin cache. To refresh a
+Git-backed installation after a release, run:
+
+```bash
+codex plugin marketplace upgrade godaddy
+codex plugin add commerce@godaddy
+```
+
+If `godaddy` was previously configured from a local checkout, replace that
+marketplace source once before using the Git URL:
+
+```bash
+codex plugin remove commerce@godaddy
+codex plugin marketplace remove godaddy
+codex plugin marketplace add https://github.com/godaddy/agent-plugins.git
 codex plugin add commerce@godaddy
 ```
 
@@ -53,9 +71,9 @@ this repository.
 
 ## Other compatible agents
 
-Install `plugins/commerce/` as the plugin root. Its portable `plugin.json` and
-`mcp.json` declare the same two skills and production MCP endpoint without
-credentials.
+Install the Git repository and select `plugins/commerce/` as the plugin root.
+Its portable `plugin.json` and `mcp.json` declare the same two skills and
+production MCP endpoint without credentials.
 
 ## Validate
 
