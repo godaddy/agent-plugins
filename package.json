@@ -1,5 +1,5 @@
 {
-  "name": "@godaddy/agent-plugins",
+  "name": "@godaddy/commerce-agent-plugin",
   "version": "0.0.0",
   "private": true,
   "type": "module",

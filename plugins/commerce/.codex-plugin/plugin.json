@@ -1,0 +1,41 @@
+{
+  "name": "commerce",
+  "version": "0.1.0+codex.20260806202207",
+  "description": "Build safe storefronts and payment flows with GoDaddy Commerce.",
+  "author": {
+    "name": "GoDaddy",
+    "url": "https://www.godaddy.com/"
+  },
+  "homepage": "https://github.com/godaddy/agent-plugins/tree/main/plugins/commerce",
+  "repository": "https://github.com/godaddy/agent-plugins",
+  "keywords": [
+    "godaddy",
+    "commerce",
+    "storefront",
+    "payments",
+    "checkout",
+    "mcp"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "GoDaddy Commerce",
+    "shortDescription": "Build storefront and payment experiences",
+    "longDescription": "Use GoDaddy Commerce skills and MCP tools to build production storefronts, integrate catalog data, design secure checkout handoffs, and implement payment flows from approved provider contracts.",
+    "developerName": "GoDaddy",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://www.godaddy.com/commerce",
+    "privacyPolicyURL": "https://www.godaddy.com/legal/agreements/privacy-policy",
+    "termsOfServiceURL": "https://www.godaddy.com/legal/agreements/universal-terms-of-service-agreement",
+    "defaultPrompt": [
+      "Build a storefront from my GoDaddy Commerce catalog.",
+      "Add a secure checkout and payment flow.",
+      "Audit this commerce UI for catalog and payment correctness."
+    ],
+    "brandColor": "#09757A"
+  }
+}

@@ -3,6 +3,11 @@
 ## Contract and security
 
 - Identify the exact provider, environment, API/event versions, and operation.
+- For GoDaddy hosted checkout, confirm the checkout-specific host, runtime OAuth
+  client, store/channel binding, `MutationCreateCheckoutSessionInput`, and `url`
+  response field.
+- Confirm MCP checkout configuration/readiness calls are agent-time checks and
+  are not used as the shopper session-creation API.
 - Confirm server-only secrets, sanitized logs, scope, and order ownership checks.
 - Confirm amount/currency come from server-owned state.
 - Confirm redirect targets are server-owned and webhook signatures use raw bytes.

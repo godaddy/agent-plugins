@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "commerce": {
+      "type": "http",
+      "url": "https://mcp.commerce.api.godaddy.com/mcp",
+      "oauth": {
+        "client_id": "39489dee-4103-4284-9aab-9f2452142bce"
+      },
+      "oauth_resource": "https://mcp.commerce.api.godaddy.com/mcp",
+      "scopes": [
+        "openid",
+        "profile",
+        "email",
+        "offline_access",
+        "commerce.product:read",
+        "commerce.store:read",
+        "commerce.channel:read",
+        "commerce.order:read",
+        "commerce.onboarding-application:read",
+        "apps.app-registry:read"
+      ]
+    }
+  }
+}

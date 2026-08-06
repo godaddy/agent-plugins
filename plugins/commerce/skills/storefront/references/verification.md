@@ -4,7 +4,11 @@
 
 - Confirm source mode, endpoint, environment, authenticated store, and currency.
 - Confirm MCP discovery returned the called tools and current schemas.
+- Confirm application catalog/cart requests use the runtime storefront APIs, not
+  the agent's MCP session or OAuth token.
 - Confirm the UI adds SKU/variant IDs, while product IDs remain presentation IDs.
+- Confirm the first cart write creates a draft order, adds SKUs through the
+  server-priced line-item operation, and re-reads the cart totals.
 - Confirm server checkout ignores browser-supplied prices and display text.
 - Confirm live failures do not switch to fixtures.
 

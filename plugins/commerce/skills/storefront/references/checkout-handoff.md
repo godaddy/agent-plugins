@@ -1,11 +1,23 @@
 # Checkout handoff
 
+Checkout-session creation is a payments operation. Activate the payments skill
+and use its selected provider contract. For GoDaddy hosted checkout, the payments
+skill contains the exact GraphQL host, mutation, authentication, request, and
+response contract. `commerce_checkout_configuration_get` configures the handoff
+and `commerce_checkout_validate` verifies the completed application; neither tool
+creates a shopper session.
+
 ## Request
 
 The browser sends stable variant/SKU IDs and quantities to a same-origin
 backend. The backend authenticates the shopper as needed, reloads sellable data,
 checks currency and availability, computes totals, applies server-owned tax,
 shipping, and discount rules, and creates an idempotent checkout session.
+
+For a draft-order cart, pass the durable `draftOrderId`; do not rebuild line-item
+prices in the browser. For Buy Now, pass a concrete `skuId` and quantity. Keep
+provider-specific flags, store/channel identifiers, credentials, and source
+attribution server-owned.
 
 Allowlist return and cancel locations on the server. Do not accept arbitrary
 absolute URLs from the browser. Expect a provider session response to contain a

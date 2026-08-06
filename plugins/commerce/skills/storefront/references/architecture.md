@@ -3,27 +3,41 @@
 ## Required shape
 
 ```text
-browser UI -> same-origin application backend -> Commerce MCP/API
-                                         \----> checkout/payment provider
-provider webhook/verification -> backend -> durable order/payment state
+agent --------> Commerce MCP -> store/channel setup, catalog administration,
+                              order inspection, checkout configuration/readiness
+
+browser UI -> same-origin application backend -> catalog storefront API
+                                         \----> order storefront API
+                                         \----> hosted checkout/payment provider
+provider webhook/status lookup -> backend -> durable order/payment state
 ```
 
-The browser receives a purpose-built storefront contract, not an MCP client or
-provider secret. The backend owns authentication, capability discovery, input
-validation, price calculation, retries, idempotency, and response normalization.
+Do not collapse these planes. MCP is an agent-facing control surface; it is not
+the browser's catalog, cart, or checkout client. The browser receives a
+purpose-built storefront contract, not an MCP client or provider secret. The
+backend owns runtime configuration, input validation, authoritative product and
+price lookup, retries, idempotency, and response normalization.
 
 ## Browser contract
 
 Expose narrow endpoints such as:
 
-- `GET /api/catalog`
-- `GET /api/products/:id`
+- `GET /api/commerce/products`
+- `GET /api/commerce/products/:id`
+- `GET /api/commerce/skus/:id`
+- `POST /api/commerce/cart`
+- `GET /api/commerce/cart/:id`
+- `POST /api/commerce/cart/:id/items`
+- `PATCH /api/commerce/cart/:id/items/:itemId`
+- `DELETE /api/commerce/cart/:id/items/:itemId`
 - `POST /api/checkout/sessions`
 - `GET /api/checkout/sessions/:id`
 
-Do not expose `POST /api/mcp/call` with a caller-controlled tool name. Maintain
-an allowlist on the server and build MCP arguments from validated application
-input.
+Route names may follow the host application's conventions. Keep their purpose
+and request/response shapes narrow. Do not expose `POST /api/mcp/call` with a
+caller-controlled tool name. If an application deliberately uses MCP on its
+server, maintain a fixed allowlist and server-built arguments; never reuse the
+agent's interactive OAuth token.
 
 Use secure, HTTP-only, same-site cookies for session identifiers where possible.
 Apply CSRF protection to cookie-authenticated mutations. Constrain CORS, request
