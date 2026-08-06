@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "godaddy",
   "version": "0.1.0",
-  "description": "Build with GoDaddy using agent skills and production MCP capabilities.",
+  "description": "Build with GoDaddy using domain, Commerce, CLI, and production MCP capabilities.",
   "author": {
     "name": "GoDaddy"
   },
@@ -10,6 +10,9 @@
   "repository": "https://github.com/godaddy/commerce-agent-plugin",
   "keywords": [
     "godaddy",
+    "domains",
+    "dns",
+    "cli",
     "commerce",
     "storefront",
     "payments",
