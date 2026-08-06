@@ -11,7 +11,7 @@ Proposed first plugin: `commerce`
 Publish an installable, vendor-neutral Agent Plugin that helps compatible AI
 clients use GoDaddy Commerce safely and consistently. The plugin will package:
 
-- a general `commerce` Agent Skill for non-payment Commerce workflows;
+- a `storefront` Agent Skill for non-payment Commerce workflows;
 - an isolated `payments` Agent Skill for transactions and monetary movement;
 - a Streamable HTTP connection to the production GoDaddy Commerce MCP server;
 - client-neutral guidance for capability discovery, OAuth, mutations, and
@@ -43,10 +43,10 @@ specification deliberately leaves distribution and installation to clients.
    the endpoint's OAuth protected-resource metadata and their own secure
    credential flow.
 6. **Teach discovery before tool invocation.** Commerce MCP exposes a small core
-   tool set and loads specialized tools through `search_tools`. The `commerce`
+   tool set and loads specialized tools through `search_tools`. The `storefront`
    skill must discover the current tool contract rather than hard-code an
    exhaustive catalog; `payments` must inspect its approved API contracts.
-7. **Ship two deliberately separated skills.** `commerce` covers stores,
+7. **Ship two deliberately separated skills.** `storefront` covers stores,
    catalog, orders, apps, and reporting. `payments` covers only monetary
    transactions, refunds, voids, and transaction events. The two descriptions
    must explicitly hand off to each other at the payment boundary.
@@ -71,7 +71,7 @@ agent-plugins/
 │       ├── mcp.json
 │       ├── README.md
 │       └── skills/
-│           ├── commerce/
+│           ├── storefront/
 │           │   ├── SKILL.md
 │           │   └── references/
 │           └── payments/
@@ -97,13 +97,13 @@ Proposed `plugins/commerce/plugin.json`:
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "commerce",
   "version": "0.1.0",
-  "description": "Use GoDaddy Commerce through dedicated commerce and payments skills.",
+  "description": "Use GoDaddy Commerce through dedicated storefront and payments skills.",
   "author": {
     "name": "GoDaddy"
   },
   "homepage": "https://github.com/godaddy/agent-plugins/tree/main/plugins/commerce",
   "repository": "https://github.com/godaddy/agent-plugins",
-  "keywords": ["godaddy", "commerce", "payments", "transactions", "mcp"]
+  "keywords": ["godaddy", "commerce", "storefront", "payments", "transactions", "mcp"]
 }
 ```
 
@@ -130,7 +130,7 @@ and portable OAuth configuration is outside Agent Plugins 1.0.0.
 
 ## Initial skill set
 
-### `commerce`
+### `storefront`
 
 Use for stores, catalog/products, variants, categories, inventory, orders, apps,
 and reporting through the Commerce MCP server. It should discover specialized
@@ -143,7 +143,7 @@ events, and other monetary movement to `payments`.
 Use only for payment transactions and their lifecycle: transaction lookup,
 authorization/capture concepts, refunds, voids, and settlement events. It must
 not answer general catalog, order, store, app, or reporting questions. Reading
-an order's projected `paymentStatus` remains a `commerce` task; inspecting the
+an order's projected `paymentStatus` remains a `storefront` task; inspecting the
 underlying monetary transactions is a `payments` task.
 
 The Payments skill must be contract-driven. The currently reviewed Transactions
@@ -163,7 +163,7 @@ depend on another skill being loaded.
 
 1. Confirm the target GoDaddy environment and store before acting.
 2. Check the connected MCP server or API and its authentication state.
-3. In `commerce`, inspect core tools and call `search_tools` for the requested
+3. In `storefront`, inspect core tools and call `search_tools` for the requested
    capability. In `payments`, inspect the approved bundled OpenAPI or AsyncAPI
    contract before drafting a request or event consumer.
 4. Use the current MCP or API schema; do not rely on remembered parameter shapes.
@@ -227,14 +227,14 @@ OAuth handling, connect, discover tools, and perform a read-only smoke test.
 
 ### Phase 3 — MVP skills
 
-- Implement the general `commerce` skill and the isolated `payments` skill.
+- Implement the `storefront` skill and the isolated `payments` skill.
 - Add prompt scenarios for routing at the payment boundary, happy paths, missing
   auth, ambiguous stores, empty results, schema changes, validation failures,
   and attempted unsupported payment writes.
 - Evaluate skill activation, MCP or API selection, argument validity, mutation
   safety, and usefulness of the final response.
 - Verify that payment transaction work never falls through to the broad
-  `commerce` skill and non-payment work never activates `payments`.
+  `storefront` skill and non-payment work never activates `payments`.
 
 **Exit gate:** every skill validates independently and passes its scenario suite
 without depending on undocumented client behavior.
@@ -299,7 +299,7 @@ Release candidates should additionally run manual or automated checks for:
 - No package path or symlink escapes `plugins/commerce/`.
 - No secrets, credentials, or static authorization headers are committed.
 - The production endpoint uses `streamable-http` over HTTPS.
-- Both `commerce` and `payments` load independently and route cleanly at the
+- Both `storefront` and `payments` load independently and route cleanly at the
   payment boundary.
 - Both skills inspect the current MCP or API contract before specialized calls.
 - Non-payment writes are explicit, scoped, and verified. Payment writes remain
