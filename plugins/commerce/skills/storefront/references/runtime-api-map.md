@@ -29,15 +29,17 @@ MCP discovery describes MCP tools only. It does not discover the application's
 runtime GraphQL operations. Do not ship the interactive agent OAuth token or an
 arbitrary MCP dispatcher in the generated application.
 
-## Required runtime configuration
+## Production runtime configuration
 
 Resolve and persist these values outside browser-controlled input:
 
-- `apiBaseUrl`: the configured GoDaddy API origin for the selected environment;
 - `storeId`: the store selected or created through Commerce MCP;
 - `channelId`: the registered sales channel used by draft orders and checkout;
 - `clientId`: the runtime application's registered public client identifier;
 - `currencyCode`: the store's actual ISO 4217 currency.
+
+The public production API origin is fixed at `https://api.godaddy.com`. Do not
+add an origin setting, endpoint picker, or browser-supplied override.
 
 The MCP login and application runtime are separate security contexts. The app
 must receive its own approved runtime configuration. Keep provider credentials
@@ -46,9 +48,9 @@ same-origin proxy routes so store/channel binding, validation, caching, and abus
 controls remain server-owned.
 
 Use GraphQL `POST` requests with `Content-Type: application/json`. Current
-storefront subgraphs use `X-Store-ID: <storeId>` and
-`X-Client-ID: <clientId>` headers. Confirm the current schema and required
-headers in the target environment before deployment.
+production storefront subgraphs use `X-Store-ID: <storeId>` and
+`X-Client-ID: <clientId>` headers. Confirm the current production schema and
+required headers before deployment.
 
 ## Browser-facing contract
 
@@ -73,10 +75,10 @@ mutation so every cart route returns one stable view model.
 
 ## Catalog storefront API
 
-Endpoint:
+Production endpoint:
 
 ```text
-{apiBaseUrl}/v2/commerce/stores/{storeId}/catalog-subgraph/storefront
+https://api.godaddy.com/v2/commerce/stores/{storeId}/catalog-subgraph/storefront
 ```
 
 Use these GraphQL operations:
@@ -114,10 +116,10 @@ fan-out; do not fetch full details for an unbounded product grid.
 
 ## Draft-order cart API
 
-Endpoint:
+Production endpoint:
 
 ```text
-{apiBaseUrl}/v1/commerce/order-storefront-subgraph
+https://api.godaddy.com/v1/commerce/order-storefront-subgraph
 ```
 
 A cart is a draft order. Use the current schemas for these operations:
@@ -152,7 +154,7 @@ of ownership.
 
 ## Implementation sequence
 
-1. Resolve the environment, store, channel, runtime client, and currency.
+1. Resolve the production store, channel, runtime client, and currency.
 2. Implement a server-only GraphQL requester with timeouts and structured errors.
 3. Implement product grid, product detail, and SKU routes.
 4. Normalize upstream connections and money into application view models.

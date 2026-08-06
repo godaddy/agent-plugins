@@ -255,6 +255,61 @@ async function validateInstallationDocs() {
   }
 }
 
+async function validatePublicProductionBoundary() {
+  const forbiddenFragments = [
+    { label: "a private or pre-production GoDaddy hostname", value: ["dev", "godaddy"].join("-") },
+    { label: "a private or pre-production GoDaddy hostname", value: ["test", "godaddy"].join("-") },
+    { label: "a private or pre-production GoDaddy hostname", value: ["ote", "godaddy"].join("-") },
+    { label: "an internal corporate identifier", value: ["gd", "corp"].join("") },
+    { label: "an internal GoDaddy hostname", value: [".int", "godaddy.com"].join(".") },
+    { label: "a configurable API origin", value: ["api", "Base", "Url"].join("") },
+    { label: "a configurable API origin", value: ["API", "BASE", "URL"].join("_") },
+    { label: "a configurable API origin", value: ["base", "url"].join(" ") },
+    { label: "an MCP endpoint override", value: ["COMMERCE", "MCP", "URL"].join("_") },
+    { label: "a local Commerce MCP endpoint", value: ["localhost", "5001/mcp"].join(":") },
+    { label: "pre-production provider guidance", value: ["provider", "sandbox"].join(" ") },
+    { label: "pre-production guidance", value: ["non", "production"].join("-") },
+  ];
+  const ignoredDirectories = new Set([".git", "node_modules", "dist"]);
+  const allowedGoDaddyHosts = new Set([
+    "godaddy.com",
+    "www.godaddy.com",
+    "api.godaddy.com",
+    "checkout.commerce.api.godaddy.com",
+    "mcp.commerce.api.godaddy.com",
+  ]);
+
+  async function scan(path) {
+    for (const entry of await readdir(path, { withFileTypes: true })) {
+      if (entry.isDirectory() && ignoredDirectories.has(entry.name)) continue;
+      const child = resolve(path, entry.name);
+      if (entry.isDirectory()) {
+        await scan(child);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      const source = await readFile(child, "utf8").catch(() => "");
+      const normalized = source.toLowerCase();
+      for (const match of source.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)) {
+        const hostname = match[1].toLowerCase();
+        const isGoDaddyHost = hostname === "godaddy.com"
+          || hostname.endsWith(".godaddy.com")
+          || hostname.endsWith("-godaddy.com");
+        if (isGoDaddyHost && !allowedGoDaddyHosts.has(hostname)) {
+          fail(`${relative(root, child)} exposes a non-public GoDaddy URL.`);
+        }
+      }
+      for (const rule of forbiddenFragments) {
+        if (normalized.includes(rule.value.toLowerCase())) {
+          fail(`${relative(root, child)} exposes ${rule.label}.`);
+        }
+      }
+    }
+  }
+
+  await scan(root);
+}
+
 const entries = await readdir(pluginsRoot, { withFileTypes: true }).catch(() => []);
 const pluginEntries = entries.filter((entry) => entry.isDirectory());
 if (pluginEntries.length !== 1 || pluginEntries[0]?.name !== "commerce") {
@@ -266,6 +321,7 @@ for (const entry of pluginEntries) {
 if (pluginCount === 0) fail("No plugins found.");
 await validateMarketplace();
 await validateInstallationDocs();
+await validatePublicProductionBoundary();
 
 if (errors.length > 0) {
   console.error(errors.map((error) => `- ${error}`).join("\n"));

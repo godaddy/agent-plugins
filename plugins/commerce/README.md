@@ -39,19 +39,13 @@ for an app that uses the same rules. It runs with conspicuously labeled fixtures
 by default and can read catalog data from Commerce MCP when server-side
 credentials are provided.
 
-## Endpoints
+## Production endpoint
 
-Both MCP configurations target production:
+Both MCP configurations use the fixed public production endpoint:
 
 ```text
 https://mcp.commerce.api.godaddy.com/mcp
 ```
 
-Client-local development may override this with:
-
-```text
-https://mcp.commerce.api.dev-godaddy.com/mcp
-http://localhost:5001/mcp
-```
-
-Never commit a bearer token or an `Authorization` header to this package.
+The public plugin does not accept an endpoint override. Never commit a bearer
+token or an `Authorization` header to this package.

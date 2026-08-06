@@ -2,7 +2,7 @@
 
 ## Contract and security
 
-- Identify the exact provider, environment, API/event versions, and operation.
+- Identify the exact provider, production API/event versions, and operation.
 - For GoDaddy hosted checkout, confirm the checkout-specific host, runtime OAuth
   client, store/channel binding, `MutationCreateCheckoutSessionInput`, and `url`
   response field.
@@ -26,10 +26,12 @@
 
 1. Unit/contract tests prove mapping and state rules.
 2. Local fixture tests prove UI and application orchestration only.
-3. Provider sandbox tests prove an external integration in a non-production
-   environment.
-4. Production readiness additionally needs secrets, monitoring, alerting,
-   reconciliation, support, compliance, and rollback review.
+3. Production read-only or no-charge checks prove connectivity, authorization,
+   and readiness when the provider supports them.
+4. A real production transaction requires explicit user authorization and a
+   legitimate merchant operation; never create one merely as a test. Production
+   readiness additionally needs secrets, monitoring, alerting, reconciliation,
+   support, compliance, and rollback review.
 
 Report the level actually reached. Do not describe a fixture checkout as a
 payment-provider test.
