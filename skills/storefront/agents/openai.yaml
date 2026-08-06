@@ -1,8 +1,8 @@
 interface:
-  display_name: "Commerce Storefront"
+  display_name: "GoDaddy Storefront"
   short_description: "Build safe, usable commerce storefronts"
   default_prompt: "Use $storefront to build a production-ready commerce storefront."
-  brand_color: "#111111"
+  brand_color: "#09757A"
 dependencies:
   tools:
     - type: "mcp"

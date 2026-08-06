@@ -1,0 +1,29 @@
+{
+  "name": "godaddy-ai-toolkit",
+  "owner": {
+    "name": "GoDaddy"
+  },
+  "metadata": {
+    "description": "GoDaddy skills and MCP capabilities for Cursor"
+  },
+  "plugins": [
+    {
+      "name": "godaddy",
+      "source": "./",
+      "description": "Build GoDaddy-powered experiences with Commerce storefront and payments skills.",
+      "version": "0.1.0",
+      "author": {
+        "name": "GoDaddy"
+      },
+      "homepage": "https://github.com/godaddy/commerce-agent-plugin",
+      "keywords": [
+        "godaddy",
+        "commerce",
+        "storefront",
+        "payments",
+        "checkout",
+        "mcp"
+      ]
+    }
+  ]
+}

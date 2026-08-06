@@ -1,17 +1,38 @@
-import { lstat, readdir, readFile, realpath } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { lstat, readdir, readFile, realpath } from "node:fs/promises";
 import { dirname, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const pluginsRoot = resolve(root, "plugins");
-const marketplacePath = resolve(root, ".agents", "plugins", "marketplace.json");
+const pluginName = "godaddy";
+const marketplaceName = "godaddy-ai-toolkit";
+const repositoryUrl = "https://github.com/godaddy/commerce-agent-plugin";
+const repositoryGitUrl = `${repositoryUrl}.git`;
+const commerceMcpUrl = "https://mcp.commerce.api.godaddy.com/mcp";
+const oauthClientId = "39489dee-4103-4284-9aab-9f2452142bce";
+const requiredSkills = new Set(["payments", "storefront"]);
+const expectedScopes = [
+  "openid",
+  "profile",
+  "email",
+  "offline_access",
+  "commerce.product:read",
+  "commerce.store:read",
+  "commerce.channel:read",
+  "commerce.order:read",
+  "commerce.onboarding-application:read",
+  "apps.app-registry:read",
+];
+const ignoredDirectories = new Set([".git", "node_modules", "dist"]);
 const errors = [];
-let pluginCount = 0;
 let skillCount = 0;
 
 function fail(message) {
   errors.push(message);
+}
+
+function pathLabel(path) {
+  return relative(root, path) || ".";
 }
 
 function contained(parent, child) {
@@ -19,13 +40,22 @@ function contained(parent, child) {
   return path === "" || (!path.startsWith(`..${sep}`) && path !== "..");
 }
 
+function baseVersion(version) {
+  return typeof version === "string" ? version.split("+", 1)[0] : undefined;
+}
+
 async function json(path) {
   try {
     return JSON.parse(await readFile(path, "utf8"));
   } catch (error) {
-    fail(`${relative(root, path)} is not valid JSON: ${error.message}`);
+    fail(`${pathLabel(path)} is not valid JSON: ${error.message}`);
     return null;
   }
+}
+
+async function assertRegularFile(path) {
+  const stat = await lstat(path).catch(() => null);
+  if (!stat?.isFile()) fail(`${pathLabel(path)} must be a regular file.`);
 }
 
 async function assertNoSymlinks(path, packageRoot) {
@@ -33,233 +63,248 @@ async function assertNoSymlinks(path, packageRoot) {
     const child = resolve(path, entry.name);
     const stat = await lstat(child);
     if (stat.isSymbolicLink()) {
-      fail(`${relative(root, child)} is a symlink; portable package paths must be regular files or directories.`);
+      fail(`${pathLabel(child)} is a symlink; plugin content must be regular files or directories.`);
       const target = await realpath(child).catch(() => null);
-      if (target && !contained(packageRoot, target)) fail(`${relative(root, child)} escapes its package root.`);
+      if (target && !contained(packageRoot, target)) fail(`${pathLabel(child)} escapes the plugin root.`);
       continue;
     }
     if (entry.isDirectory()) await assertNoSymlinks(child, packageRoot);
   }
 }
 
-async function assertMarkdownLinks(path, packageRoot) {
+async function assertMarkdownLinks(path) {
   const source = await readFile(path, "utf8");
-  const links = source.matchAll(/\[[^\]]*\]\(([^)]+)\)/g);
-  for (const [, raw] of links) {
+  for (const [, raw] of source.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)) {
     const href = raw.trim().replace(/^<|>$/g, "").split("#", 1)[0];
     if (!href || /^(https?:|mailto:)/.test(href)) continue;
-    const target = resolve(dirname(path), decodeURIComponent(href));
-    if (!contained(packageRoot, target)) {
-      fail(`${relative(root, path)} links outside its plugin package: ${raw}`);
-    } else if (!existsSync(target)) {
-      fail(`${relative(root, path)} has a missing relative link: ${raw}`);
+    let target;
+    try {
+      target = resolve(dirname(path), decodeURIComponent(href));
+    } catch {
+      fail(`${pathLabel(path)} contains an invalid relative link: ${raw}`);
+      continue;
     }
+    if (!contained(root, target)) fail(`${pathLabel(path)} links outside the plugin root: ${raw}`);
+    else if (!existsSync(target)) fail(`${pathLabel(path)} has a missing relative link: ${raw}`);
   }
 }
 
-async function validateSkill(skillRoot, expectedName, packageRoot) {
+async function collectFiles(path, predicate, output = []) {
+  for (const entry of await readdir(path, { withFileTypes: true })) {
+    if (entry.isDirectory() && ignoredDirectories.has(entry.name)) continue;
+    const child = resolve(path, entry.name);
+    if (entry.isDirectory()) await collectFiles(child, predicate, output);
+    else if (entry.isFile() && predicate(child, entry.name)) output.push(child);
+  }
+  return output;
+}
+
+async function validateSkill(skillRoot, expectedName) {
   const skillFile = resolve(skillRoot, "SKILL.md");
-  const stat = await lstat(skillFile).catch(() => null);
-  if (!stat?.isFile()) return fail(`${relative(root, skillFile)} must be a regular file.`);
-  const source = await readFile(skillFile, "utf8");
+  await assertRegularFile(skillFile);
+  const source = await readFile(skillFile, "utf8").catch(() => "");
   const frontmatter = source.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!frontmatter) return fail(`${relative(root, skillFile)} has no YAML frontmatter.`);
+  if (!frontmatter) {
+    fail(`${pathLabel(skillFile)} has no YAML frontmatter.`);
+    return;
+  }
   const keys = [...frontmatter[1].matchAll(/^([a-zA-Z0-9_-]+):/gm)].map((match) => match[1]);
   if (keys.length !== 2 || !keys.includes("name") || !keys.includes("description")) {
-    fail(`${relative(root, skillFile)} frontmatter must contain only name and description.`);
+    fail(`${pathLabel(skillFile)} frontmatter must contain only name and description.`);
   }
   const name = frontmatter[1].match(/^name:\s*["']?([^"'\r\n]+)["']?\s*$/m)?.[1]?.trim();
-  if (name !== expectedName) fail(`${relative(root, skillFile)} name must match its directory (${expectedName}).`);
-  if (!/^description:\s*.+$/m.test(frontmatter[1])) fail(`${relative(root, skillFile)} needs a description.`);
+  if (name !== expectedName) fail(`${pathLabel(skillFile)} name must match its directory (${expectedName}).`);
+  if (!/^description:\s*.+$/m.test(frontmatter[1])) fail(`${pathLabel(skillFile)} needs a description.`);
 
   const openai = resolve(skillRoot, "agents", "openai.yaml");
-  if (existsSync(openai)) {
-    const ui = await readFile(openai, "utf8");
-    if (!ui.includes(`$${expectedName}`)) fail(`${relative(root, openai)} default prompt must mention $${expectedName}.`);
-  }
+  await assertRegularFile(openai);
+  const ui = await readFile(openai, "utf8").catch(() => "");
+  if (!ui.includes(`$${expectedName}`)) fail(`${pathLabel(openai)} default prompt must mention $${expectedName}.`);
 
-  const markdown = [];
-  async function collect(path) {
-    for (const entry of await readdir(path, { withFileTypes: true })) {
-      const child = resolve(path, entry.name);
-      if (entry.isDirectory()) await collect(child);
-      else if (entry.isFile() && entry.name.endsWith(".md")) markdown.push(child);
-    }
-  }
-  await collect(skillRoot);
-  await Promise.all(markdown.map((path) => assertMarkdownLinks(path, packageRoot)));
+  const markdown = await collectFiles(skillRoot, (_, name) => name.endsWith(".md"));
+  await Promise.all(markdown.map(assertMarkdownLinks));
   skillCount += 1;
 }
 
-async function validatePlugin(packageRoot, directoryName) {
-  pluginCount += 1;
-  await assertNoSymlinks(packageRoot, packageRoot);
-  const manifest = await json(resolve(packageRoot, "plugin.json"));
-  const mcp = await json(resolve(packageRoot, "mcp.json"));
-  const codexManifest = await json(resolve(packageRoot, ".codex-plugin", "plugin.json"));
-  const codexMcp = await json(resolve(packageRoot, ".mcp.json"));
-  if (!manifest || !mcp || !codexManifest || !codexMcp) return;
-
-  const expectedPluginSchema = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json";
-  const expectedMcpSchema = "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json";
-  if (manifest.$schema !== expectedPluginSchema) fail(`${directoryName}/plugin.json uses a non-canonical schema.`);
-  if (mcp.$schema !== expectedMcpSchema) fail(`${directoryName}/mcp.json uses a non-canonical schema.`);
-  if (manifest.name !== directoryName) fail(`${directoryName}/plugin.json name must match the package directory.`);
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(manifest.name ?? "")) fail(`${directoryName} has an invalid plugin name.`);
-  if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(manifest.version ?? "")) fail(`${directoryName} has an invalid semantic version.`);
-  if (!manifest.description || !manifest.author?.name) fail(`${directoryName}/plugin.json needs description and author.name.`);
-
-  if (codexManifest.name !== directoryName) fail(`${directoryName}/.codex-plugin/plugin.json name must match the package directory.`);
-  const portableBaseVersion = manifest.version?.split("+", 1)[0];
-  const codexBaseVersion = codexManifest.version?.split("+", 1)[0];
-  if (codexBaseVersion !== portableBaseVersion) {
-    fail(`${directoryName} portable and Codex manifest base versions must match.`);
+function validateManifestIdentity(manifest, label, expectedBaseVersion) {
+  if (!manifest) return;
+  if (manifest.name !== pluginName) fail(`${label} name must be ${pluginName}.`);
+  if (baseVersion(manifest.version) !== expectedBaseVersion) {
+    fail(`${label} base version must be ${expectedBaseVersion}.`);
   }
-  if (!codexManifest.description || !codexManifest.author?.name) {
-    fail(`${directoryName}/.codex-plugin/plugin.json needs description and author.name.`);
+  if (!manifest.description || manifest.author?.name !== "GoDaddy") {
+    fail(`${label} needs a description and GoDaddy author.`);
   }
-  if (codexManifest.skills !== "./skills/") fail(`${directoryName} Codex manifest must declare ./skills/.`);
-  if (codexManifest.mcpServers !== "./.mcp.json") fail(`${directoryName} Codex manifest must declare ./.mcp.json.`);
-
-  const requiredInterfaceFields = [
-    "displayName",
-    "shortDescription",
-    "longDescription",
-    "developerName",
-    "category",
-    "capabilities",
-  ];
-  for (const field of requiredInterfaceFields) {
-    if (!codexManifest.interface?.[field] || (Array.isArray(codexManifest.interface[field]) && codexManifest.interface[field].length === 0)) {
-      fail(`${directoryName} Codex manifest interface.${field} is required.`);
-    }
-  }
-  const defaultPrompts = codexManifest.interface?.defaultPrompt ?? [];
-  if (defaultPrompts.length > 3) fail(`${directoryName} Codex manifest may contain at most three default prompts.`);
-  for (const prompt of defaultPrompts) {
-    if (typeof prompt !== "string" || prompt.length > 128) {
-      fail(`${directoryName} Codex default prompts must be strings no longer than 128 characters.`);
-    }
-  }
-  if (/\[TODO:/i.test(JSON.stringify(codexManifest))) fail(`${directoryName} Codex manifest contains a TODO placeholder.`);
-
-  for (const [name, server] of Object.entries(mcp.mcpServers ?? {})) {
-    if (server?.type !== "streamable-http") fail(`${directoryName} MCP server ${name} must use streamable-http.`);
-    try {
-      const url = new URL(server?.url);
-      if (url.protocol !== "https:" && !["localhost", "127.0.0.1", "::1"].includes(url.hostname)) {
-        fail(`${directoryName} MCP server ${name} must use HTTPS outside loopback.`);
-      }
-    } catch {
-      fail(`${directoryName} MCP server ${name} has an invalid URL.`);
-    }
-    const serialized = JSON.stringify(server);
-    if (/authorization|bearer|client.?secret|access.?token|password/i.test(serialized)) {
-      fail(`${directoryName} MCP server ${name} appears to contain credential configuration.`);
-    }
-  }
-
-  const codexServers = Object.entries(codexMcp.mcpServers ?? {});
-  if (codexServers.length !== 1 || codexServers[0]?.[0] !== "commerce") {
-    fail(`${directoryName}/.mcp.json must declare only the commerce MCP server.`);
-  }
-  for (const [name, server] of codexServers) {
-    if (server?.type !== "http") fail(`${directoryName} Codex MCP server ${name} must use http.`);
-    try {
-      const url = new URL(server?.url);
-      if (url.protocol !== "https:" && !["localhost", "127.0.0.1", "::1"].includes(url.hostname)) {
-        fail(`${directoryName} Codex MCP server ${name} must use HTTPS outside loopback.`);
-      }
-    } catch {
-      fail(`${directoryName} Codex MCP server ${name} has an invalid URL.`);
-    }
-    if (server?.url !== mcp.mcpServers?.[name]?.url) {
-      fail(`${directoryName} portable and Codex MCP URLs must match for ${name}.`);
-    }
-    if (server?.oauth_resource !== server?.url) {
-      fail(`${directoryName} Codex MCP oauth_resource must match its MCP URL.`);
-    }
-    if (server?.oauth?.client_id !== "39489dee-4103-4284-9aab-9f2452142bce") {
-      fail(`${directoryName} Codex MCP server ${name} must use the registered public OAuth client.`);
-    }
-    if (server?.oauth && Object.keys(server.oauth).some((field) => field !== "client_id")) {
-      fail(`${directoryName} Codex MCP server ${name} may configure only oauth.client_id.`);
-    }
-    const expectedScopes = [
-      "openid",
-      "profile",
-      "email",
-      "offline_access",
-      "commerce.product:read",
-      "commerce.store:read",
-      "commerce.channel:read",
-      "commerce.order:read",
-      "commerce.onboarding-application:read",
-      "apps.app-registry:read",
-    ];
-    if (JSON.stringify(server?.scopes) !== JSON.stringify(expectedScopes)) {
-      fail(`${directoryName} Codex MCP server ${name} must use the provisioned read-only OAuth scopes.`);
-    }
-    if (/authorization|bearer|client.?secret|access.?token|password/i.test(JSON.stringify(server))) {
-      fail(`${directoryName} Codex MCP server ${name} appears to contain credential configuration.`);
-    }
-  }
-
-  const skillsRoot = resolve(packageRoot, "skills");
-  const skillEntries = await readdir(skillsRoot, { withFileTypes: true }).catch(() => []);
-  if (skillEntries.length === 0) fail(`${directoryName} must contain at least one skill.`);
-  for (const entry of skillEntries) {
-    if (!entry.isDirectory()) {
-      fail(`${relative(root, resolve(skillsRoot, entry.name))} must be a skill directory.`);
-      continue;
-    }
-    await validateSkill(resolve(skillsRoot, entry.name), entry.name, packageRoot);
-  }
-
-  const markdown = (await readdir(packageRoot, { withFileTypes: true }))
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
-    .map((entry) => resolve(packageRoot, entry.name));
-  await Promise.all(markdown.map((path) => assertMarkdownLinks(path, packageRoot)));
 }
 
-async function validateMarketplace() {
-  const marketplace = await json(marketplacePath);
+async function validateManifests() {
+  const portable = await json(resolve(root, "plugin.json"));
+  if (!portable) return null;
+  const expectedPluginSchema = "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json";
+  if (portable.$schema !== expectedPluginSchema) fail("plugin.json uses a non-canonical schema.");
+  if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(portable.version ?? "")) {
+    fail("plugin.json has an invalid semantic version.");
+  }
+  validateManifestIdentity(portable, "plugin.json", portable.version);
+  if (portable.homepage !== repositoryUrl || portable.repository !== repositoryUrl) {
+    fail("plugin.json must point to the repository root.");
+  }
+
+  const manifestPaths = [
+    [".codex-plugin/plugin.json", true],
+    [".claude-plugin/plugin.json", false],
+    [".cursor-plugin/plugin.json", false],
+  ];
+  for (const [relativePath, isCodex] of manifestPaths) {
+    const manifest = await json(resolve(root, relativePath));
+    validateManifestIdentity(manifest, relativePath, portable.version);
+    if (!manifest) continue;
+    if (manifest.homepage !== repositoryUrl || manifest.repository !== repositoryUrl) {
+      fail(`${relativePath} must point to the repository root.`);
+    }
+    if (!isCodex) continue;
+    if (manifest.skills !== "./skills/") fail("The Codex manifest must declare ./skills/.");
+    if (manifest.mcpServers !== "./.mcp.json") fail("The Codex manifest must declare ./.mcp.json.");
+    const requiredInterfaceFields = [
+      "displayName",
+      "shortDescription",
+      "longDescription",
+      "developerName",
+      "category",
+      "capabilities",
+    ];
+    for (const field of requiredInterfaceFields) {
+      const value = manifest.interface?.[field];
+      if (!value || (Array.isArray(value) && value.length === 0)) {
+        fail(`The Codex manifest interface.${field} is required.`);
+      }
+    }
+    const prompts = manifest.interface?.defaultPrompt ?? [];
+    if (prompts.length > 3) fail("The Codex manifest may contain at most three default prompts.");
+    if (prompts.some((prompt) => typeof prompt !== "string" || prompt.length > 128)) {
+      fail("Codex default prompts must be strings no longer than 128 characters.");
+    }
+    if (/\[TODO:/i.test(JSON.stringify(manifest))) fail("The Codex manifest contains a TODO placeholder.");
+  }
+
+  const gemini = await json(resolve(root, "gemini-extension.json"));
+  if (gemini?.name !== pluginName || baseVersion(gemini?.version) !== portable.version) {
+    fail("gemini-extension.json must use the shared plugin name and base version.");
+  }
+  const packageManifest = await json(resolve(root, "package.json"));
+  if (packageManifest?.name !== "@godaddy/ai-toolkit" || packageManifest?.version !== portable.version) {
+    fail("package.json must use the GoDaddy toolkit package name and shared base version.");
+  }
+  if (JSON.stringify(packageManifest?.pi?.skills) !== JSON.stringify(["./skills"])) {
+    fail("package.json must expose the root skills directory to Pi.");
+  }
+  return portable;
+}
+
+function assertNoCredentialMaterial(server, label) {
+  if (/authorization|bearer|client.?secret|access.?token|password/i.test(JSON.stringify(server))) {
+    fail(`${label} appears to contain credential configuration.`);
+  }
+}
+
+async function validateMcp() {
+  const portable = await json(resolve(root, "mcp.json"));
+  const codex = await json(resolve(root, ".mcp.json"));
+  if (!portable || !codex) return;
+  const expectedMcpSchema = "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json";
+  if (portable.$schema !== expectedMcpSchema) fail("mcp.json uses a non-canonical schema.");
+
+  const portableServers = Object.entries(portable.mcpServers ?? {});
+  if (portableServers.length !== 1 || portableServers[0]?.[0] !== "commerce") {
+    fail("mcp.json must declare only the commerce MCP server.");
+  }
+  const portableServer = portable.mcpServers?.commerce;
+  if (portableServer?.type !== "streamable-http" || portableServer?.url !== commerceMcpUrl) {
+    fail("mcp.json must use the production Commerce Streamable HTTP endpoint.");
+  }
+  assertNoCredentialMaterial(portableServer, "mcp.json commerce server");
+
+  const codexServers = Object.entries(codex.mcpServers ?? {});
+  if (codexServers.length !== 1 || codexServers[0]?.[0] !== "commerce") {
+    fail(".mcp.json must declare only the commerce MCP server.");
+  }
+  const server = codex.mcpServers?.commerce;
+  if (server?.type !== "http" || server?.url !== commerceMcpUrl) {
+    fail(".mcp.json must use the production Commerce HTTP endpoint.");
+  }
+  if (server?.oauth_resource !== commerceMcpUrl) fail("Commerce oauth_resource must match its MCP URL.");
+  if (server?.oauth?.client_id !== oauthClientId) fail("Commerce must use the registered public OAuth client.");
+  if (server?.oauth && Object.keys(server.oauth).some((field) => field !== "client_id")) {
+    fail("Commerce may configure only oauth.client_id.");
+  }
+  if (JSON.stringify(server?.scopes) !== JSON.stringify(expectedScopes)) {
+    fail("Commerce must use the provisioned read-only OAuth scopes.");
+  }
+  assertNoCredentialMaterial(server, ".mcp.json commerce server");
+}
+
+async function validateSkills() {
+  const skillsRoot = resolve(root, "skills");
+  await assertNoSymlinks(skillsRoot, root);
+  const entries = await readdir(skillsRoot, { withFileTypes: true }).catch(() => []);
+  const names = new Set();
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      fail(`${pathLabel(resolve(skillsRoot, entry.name))} must be a skill directory.`);
+      continue;
+    }
+    names.add(entry.name);
+    await validateSkill(resolve(skillsRoot, entry.name), entry.name);
+  }
+  for (const required of requiredSkills) {
+    if (!names.has(required)) fail(`The root plugin must include the ${required} Commerce skill.`);
+  }
+}
+
+async function validateMarketplace(path, host) {
+  const marketplace = await json(path);
   if (!marketplace) return;
-  if (marketplace.name !== "godaddy") fail("Marketplace name must be godaddy.");
-  if (!marketplace.interface?.displayName) fail("Marketplace interface.displayName is required.");
+  if (marketplace.name !== marketplaceName) fail(`${pathLabel(path)} name must be ${marketplaceName}.`);
   const entries = marketplace.plugins ?? [];
-  if (entries.length !== 1 || entries[0]?.name !== "commerce") {
-    fail("The marketplace must contain only the commerce plugin.");
+  if (entries.length !== 1 || entries[0]?.name !== pluginName) {
+    fail(`${pathLabel(path)} must contain only the ${pluginName} root plugin.`);
     return;
   }
   const entry = entries[0];
-  if (entry.source?.source !== "local" || entry.source?.path !== "./plugins/commerce") {
-    fail("The commerce marketplace entry must point to ./plugins/commerce.");
+  if (host === "codex") {
+    if (!marketplace.interface?.displayName) fail("The Codex marketplace needs interface.displayName.");
+    if (entry.source?.source !== "url" || entry.source?.url !== repositoryGitUrl) {
+      fail("The Codex marketplace must install the repository URL as the root plugin.");
+    }
+    if (entry.policy?.installation !== "AVAILABLE") fail("The GoDaddy installation policy must be AVAILABLE.");
+    if (entry.policy?.authentication !== "ON_INSTALL") fail("The GoDaddy authentication policy must be ON_INSTALL.");
+    if (!entry.category) fail("The GoDaddy marketplace entry needs a category.");
+  } else {
+    if (marketplace.owner?.name !== "GoDaddy") fail(`${pathLabel(path)} must identify GoDaddy as owner.`);
+    if (entry.source !== "./") fail(`${pathLabel(path)} must point to the repository root.`);
+    if (entry.version !== "0.1.0") fail(`${pathLabel(path)} must use the shared base version.`);
   }
-  if (entry.policy?.installation !== "AVAILABLE") fail("The commerce plugin installation policy must be AVAILABLE.");
-  if (entry.policy?.authentication !== "ON_INSTALL") fail("The commerce plugin authentication policy must be ON_INSTALL.");
-  if (!entry.category) fail("The commerce marketplace entry needs a category.");
 }
 
 async function validateInstallationDocs() {
   const readme = await readFile(resolve(root, "README.md"), "utf8");
-  const gitInstall = "codex plugin marketplace add https://github.com/godaddy/commerce-agent-plugin.git";
-  if (!readme.includes(gitInstall)) {
-    fail("README.md must document direct installation from the Git marketplace URL.");
+  const commands = [
+    `codex plugin marketplace add ${repositoryGitUrl}`,
+    `codex plugin add ${pluginName}@${marketplaceName}`,
+    "codex mcp login commerce",
+  ];
+  for (const command of commands) {
+    if (!readme.includes(command)) fail(`README.md must document: ${command}`);
   }
-  if (!readme.includes("codex plugin add commerce@godaddy")) {
-    fail("README.md must document installation of commerce@godaddy.");
-  }
-  if (readme.includes("codex plugin marketplace add /absolute/path")) {
-    fail("README.md must not present a local checkout as the primary installation path.");
-  }
+  const legacyNestedPath = ["plugins", "commerce"].join("/");
+  if (readme.includes(legacyNestedPath)) fail("README.md must treat the repository root as the plugin root.");
 }
 
 async function validatePublicProductionBoundary() {
   const forbiddenFragments = [
-    { label: "a private or pre-production GoDaddy hostname", value: ["dev", "godaddy"].join("-") },
-    { label: "a private or pre-production GoDaddy hostname", value: ["test", "godaddy"].join("-") },
-    { label: "a private or pre-production GoDaddy hostname", value: ["ote", "godaddy"].join("-") },
+    { label: "a private or pre-release GoDaddy hostname", value: ["dev", "godaddy"].join("-") },
+    { label: "a private or pre-release GoDaddy hostname", value: ["test", "godaddy"].join("-") },
+    { label: "a private or pre-release GoDaddy hostname", value: ["ote", "godaddy"].join("-") },
     { label: "an internal corporate identifier", value: ["gd", "corp"].join("") },
     { label: "an internal GoDaddy hostname", value: [".int", "godaddy.com"].join(".") },
     { label: "a configurable API origin", value: ["api", "Base", "Url"].join("") },
@@ -267,10 +312,9 @@ async function validatePublicProductionBoundary() {
     { label: "a configurable API origin", value: ["base", "url"].join(" ") },
     { label: "an MCP endpoint override", value: ["COMMERCE", "MCP", "URL"].join("_") },
     { label: "a local Commerce MCP endpoint", value: ["localhost", "5001/mcp"].join(":") },
-    { label: "pre-production provider guidance", value: ["provider", "sandbox"].join(" ") },
-    { label: "pre-production guidance", value: ["non", "production"].join("-") },
+    { label: "pre-release provider guidance", value: ["provider", "sandbox"].join(" ") },
+    { label: "pre-release guidance", value: ["non", "production"].join("-") },
   ];
-  const ignoredDirectories = new Set([".git", "node_modules", "dist"]);
   const allowedGoDaddyHosts = new Set([
     "godaddy.com",
     "www.godaddy.com",
@@ -278,54 +322,57 @@ async function validatePublicProductionBoundary() {
     "checkout.commerce.api.godaddy.com",
     "mcp.commerce.api.godaddy.com",
   ]);
-
-  async function scan(path) {
-    for (const entry of await readdir(path, { withFileTypes: true })) {
-      if (entry.isDirectory() && ignoredDirectories.has(entry.name)) continue;
-      const child = resolve(path, entry.name);
-      if (entry.isDirectory()) {
-        await scan(child);
-        continue;
-      }
-      if (!entry.isFile()) continue;
-      const source = await readFile(child, "utf8").catch(() => "");
-      const normalized = source.toLowerCase();
-      for (const match of source.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)) {
-        const hostname = match[1].toLowerCase();
-        const isGoDaddyHost = hostname === "godaddy.com"
-          || hostname.endsWith(".godaddy.com")
-          || hostname.endsWith("-godaddy.com");
-        if (isGoDaddyHost && !allowedGoDaddyHosts.has(hostname)) {
-          fail(`${relative(root, child)} exposes a non-public GoDaddy URL.`);
-        }
-      }
-      for (const rule of forbiddenFragments) {
-        if (normalized.includes(rule.value.toLowerCase())) {
-          fail(`${relative(root, child)} exposes ${rule.label}.`);
-        }
+  const files = await collectFiles(root, () => true);
+  for (const file of files) {
+    const source = await readFile(file, "utf8").catch(() => "");
+    const normalized = source.toLowerCase();
+    for (const match of source.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)) {
+      const hostname = match[1].toLowerCase();
+      const isGoDaddyHost = hostname === "godaddy.com"
+        || hostname.endsWith(".godaddy.com")
+        || hostname.endsWith("-godaddy.com");
+      if (isGoDaddyHost && !allowedGoDaddyHosts.has(hostname)) {
+        fail(`${pathLabel(file)} exposes a non-public GoDaddy URL.`);
       }
     }
+    for (const rule of forbiddenFragments) {
+      if (normalized.includes(rule.value.toLowerCase())) fail(`${pathLabel(file)} exposes ${rule.label}.`);
+    }
   }
-
-  await scan(root);
 }
 
-const entries = await readdir(pluginsRoot, { withFileTypes: true }).catch(() => []);
-const pluginEntries = entries.filter((entry) => entry.isDirectory());
-if (pluginEntries.length !== 1 || pluginEntries[0]?.name !== "commerce") {
-  fail("The repository must contain exactly one plugin directory: plugins/commerce.");
+if (existsSync(resolve(root, "plugins"))) {
+  fail("Do not nest product plugins; the repository root is the single GoDaddy plugin.");
 }
-for (const entry of pluginEntries) {
-  if (entry.isDirectory()) await validatePlugin(resolve(pluginsRoot, entry.name), entry.name);
+for (const path of [
+  "plugin.json",
+  "mcp.json",
+  ".mcp.json",
+  ".codex-plugin/plugin.json",
+  ".claude-plugin/plugin.json",
+  ".cursor-plugin/plugin.json",
+  "gemini-extension.json",
+]) {
+  await assertRegularFile(resolve(root, path));
 }
-if (pluginCount === 0) fail("No plugins found.");
-await validateMarketplace();
+
+await validateManifests();
+await validateMcp();
+await validateSkills();
+await Promise.all([
+  validateMarketplace(resolve(root, ".agents", "plugins", "marketplace.json"), "codex"),
+  validateMarketplace(resolve(root, ".claude-plugin", "marketplace.json"), "claude"),
+  validateMarketplace(resolve(root, ".cursor-plugin", "marketplace.json"), "cursor"),
+]);
 await validateInstallationDocs();
+
+const markdown = await collectFiles(root, (_, name) => name.endsWith(".md"));
+await Promise.all(markdown.map(assertMarkdownLinks));
 await validatePublicProductionBoundary();
 
 if (errors.length > 0) {
   console.error(errors.map((error) => `- ${error}`).join("\n"));
   process.exitCode = 1;
 } else {
-  console.log(`Validated ${pluginCount} plugin and ${skillCount} skills.`);
+  console.log(`Validated the ${pluginName} root plugin and ${skillCount} skills.`);
 }
