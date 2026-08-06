@@ -32,6 +32,9 @@ mcp_oauth_callback_port = 6274
 mcp_oauth_callback_url = "http://localhost:6274/"
 ```
 
+Register the derived redirect URI
+`http://localhost:6274/IhM2a8vIl6u-` for this public client.
+
 Then authenticate the bundled Commerce connection:
 
 ```bash
@@ -42,6 +45,15 @@ To pick up a release from the Git-backed marketplace, run:
 
 ```bash
 codex plugin marketplace upgrade godaddy-ai-toolkit
+codex plugin add godaddy@godaddy-ai-toolkit
+```
+
+If the former `commerce@godaddy` package is installed, migrate it once:
+
+```bash
+codex plugin remove commerce@godaddy
+codex plugin marketplace remove godaddy
+codex plugin marketplace add https://github.com/godaddy/commerce-agent-plugin.git
 codex plugin add godaddy@godaddy-ai-toolkit
 ```
 
