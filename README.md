@@ -1,9 +1,11 @@
 # GoDaddy AI Toolkit
 
 One installable `godaddy` agent plugin for building with GoDaddy. The toolkit
-starts with two Commerce skills and the production GoDaddy Commerce MCP server:
+starts with the GoDaddy Domains CLI skill, two Commerce skills, and the
+production GoDaddy Commerce MCP server:
 
 ```text
+skills/gddy          domain search, registration, and DNS through the CLI
 skills/storefront    catalog, product detail, cart, and checkout handoff
 skills/payments      checkout, payment lifecycle, and transaction work
 examples/storefront  runnable reference implementation
@@ -58,7 +60,9 @@ codex plugin add godaddy@godaddy-ai-toolkit
 ```
 
 Start a new thread after installation or an update. Codex will load the
-`godaddy:storefront` and `godaddy:payments` skills and the Commerce MCP tools.
+`godaddy:gddy`, `godaddy:storefront`, and `godaddy:payments` skills and the
+Commerce MCP tools. The `gddy` skill checks the locally installed CLI and guides
+its separate browser authentication only when a domain task needs it.
 
 ## Host entry points
 
@@ -72,9 +76,9 @@ The root layout follows the same one-toolkit pattern across agent hosts:
 - `package.json#pi.skills` for Pi
 
 Install this repository root when a host supports installing a plugin from a
-Git URL. The skills contain the workflow knowledge; the MCP connection exposes
-account-specific Commerce capabilities. Hosts remain responsible for OAuth and
-credential storage.
+Git URL. The skills contain workflow knowledge; `gddy` provides account-aware
+Domains operations and the MCP connection exposes account-specific Commerce
+capabilities. Hosts remain responsible for OAuth and credential storage.
 
 ## Production boundary
 
@@ -92,12 +96,13 @@ npm run validate
 ```
 
 This checks the single root plugin, cross-host manifest agreement, marketplace
-sources, Commerce skills, OAuth configuration, relative links, and the public
+sources, required skills, OAuth configuration, relative links, and the public
 production boundary. The reference storefront has separate tests, typechecks,
 and a production build.
 
 See [the toolkit plan](docs/toolkit-plan.md) for the architecture and expansion
-rules.
+rules, and [the developer-platform skill map](docs/developer-platform-skill-map.md)
+for the page-by-page documentation audit.
 
 > Status: pre-release. Public-release governance and cross-host compatibility
 > testing are still required.

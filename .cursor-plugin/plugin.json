@@ -1,6 +1,6 @@
 {
   "name": "godaddy",
-  "description": "GoDaddy tools for Cursor, starting with storefront and payments skills backed by production Commerce capabilities.",
+  "description": "GoDaddy tools for Cursor, including the Domains CLI plus Commerce storefront and payments skills.",
   "version": "0.1.0",
   "author": {
     "name": "GoDaddy"
@@ -9,6 +9,9 @@
   "repository": "https://github.com/godaddy/commerce-agent-plugin",
   "keywords": [
     "godaddy",
+    "domains",
+    "dns",
+    "cli",
     "commerce",
     "storefront",
     "payments",

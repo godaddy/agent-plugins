@@ -10,7 +10,7 @@ const repositoryUrl = "https://github.com/godaddy/commerce-agent-plugin";
 const repositoryGitUrl = `${repositoryUrl}.git`;
 const commerceMcpUrl = "https://mcp.commerce.api.godaddy.com/mcp";
 const oauthClientId = "39489dee-4103-4284-9aab-9f2452142bce";
-const requiredSkills = new Set(["payments", "storefront"]);
+const requiredSkills = new Set(["gddy", "payments", "storefront"]);
 const expectedScopes = [
   "openid",
   "profile",
@@ -257,7 +257,7 @@ async function validateSkills() {
     await validateSkill(resolve(skillsRoot, entry.name), entry.name);
   }
   for (const required of requiredSkills) {
-    if (!names.has(required)) fail(`The root plugin must include the ${required} Commerce skill.`);
+    if (!names.has(required)) fail(`The root plugin must include the ${required} skill.`);
   }
 }
 
@@ -319,6 +319,8 @@ async function validatePublicProductionBoundary() {
     "godaddy.com",
     "www.godaddy.com",
     "api.godaddy.com",
+    "developer.godaddy.com",
+    "oauth.api.godaddy.com",
     "checkout.commerce.api.godaddy.com",
     "mcp.commerce.api.godaddy.com",
   ]);
