@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 840" role="img" aria-label="Blue ground cloth">
+  <rect width="800" height="840" fill="#a9bbcc"/>
+  <path d="m109 628 224-447 358 189-224 348-358-90Z" fill="#135fca" stroke="#171713" stroke-width="8"/>
+  <path d="m333 181 134 537M109 628l582-258M214 419l354 114" fill="none" stroke="#f1efe7" stroke-width="5" opacity=".55"/>
+  <path d="m538 289 153 81-224 348-34-136 105-293Z" fill="#174b91"/>
+  <g fill="#e8c93e" stroke="#171713" stroke-width="5"><circle cx="333" cy="181" r="15"/><circle cx="109" cy="628" r="15"/><circle cx="691" cy="370" r="15"/><circle cx="467" cy="718" r="15"/></g>
+  <path d="M80 115h180M588 712h135" stroke="#171713" opacity=".3"/>
+</svg>

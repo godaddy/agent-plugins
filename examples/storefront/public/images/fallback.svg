@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 840" role="img" aria-label="Product image unavailable">
+  <rect width="800" height="840" fill="#dedbd2"/>
+  <path d="M100 100h600v640H100zM100 100l600 640M700 100 100 740" fill="none" stroke="#171713" stroke-width="3"/>
+  <circle cx="400" cy="420" r="110" fill="#f1efe7" stroke="#171713" stroke-width="4"/>
+  <text x="400" y="430" text-anchor="middle" font-family="Arial" font-size="24" letter-spacing="4">OBJECT</text>
+</svg>

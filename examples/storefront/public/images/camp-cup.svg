@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 840" role="img" aria-label="Steel camp cup">
+  <rect width="800" height="840" fill="#d7d2c7"/>
+  <path d="M111 164h578M75 681h650" stroke="#171713" opacity=".22"/>
+  <ellipse cx="359" cy="287" rx="184" ry="58" fill="#f1efe7" stroke="#171713" stroke-width="8"/>
+  <path d="M175 287h368l-29 316c-5 56-52 99-108 99h-94c-56 0-103-43-108-99l-29-316Z" fill="#b9bbb9" stroke="#171713" stroke-width="8"/>
+  <path d="M544 356h52c77 0 139 62 139 139s-62 139-139 139h-70l10-71h60c38 0 68-30 68-68s-30-68-68-68h-58l6-71Z" fill="#135fca" stroke="#171713" stroke-width="8"/>
+  <ellipse cx="359" cy="287" rx="154" ry="34" fill="#4f4434"/>
+  <path d="m264 368-22 230M326 356l-12 276" stroke="#f1efe7" stroke-width="8" opacity=".65"/>
+</svg>

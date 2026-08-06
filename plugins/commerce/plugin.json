@@ -1,0 +1,19 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "commerce",
+  "version": "0.1.0",
+  "description": "Build safe commerce storefronts and payment flows with GoDaddy Commerce.",
+  "author": {
+    "name": "GoDaddy"
+  },
+  "homepage": "https://github.com/godaddy/agent-plugins/tree/main/plugins/commerce",
+  "repository": "https://github.com/godaddy/agent-plugins",
+  "keywords": [
+    "godaddy",
+    "commerce",
+    "storefront",
+    "payments",
+    "checkout",
+    "mcp"
+  ]
+}

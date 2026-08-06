@@ -1,0 +1,27 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  plugin-and-reference-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - name: Validate portable package
+        run: node scripts/validate.mjs
+      - name: Install reference app
+        run: pnpm --dir examples/storefront install --frozen-lockfile
+      - name: Test reference app
+        run: pnpm --dir examples/storefront test
+      - name: Build reference app
+        run: pnpm --dir examples/storefront build

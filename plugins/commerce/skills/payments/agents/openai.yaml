@@ -1,0 +1,5 @@
+interface:
+  display_name: "Commerce Payments"
+  short_description: "Implement safe payment and checkout flows"
+  default_prompt: "Use $payments to implement a secure commerce payment flow."
+  brand_color: "#111111"

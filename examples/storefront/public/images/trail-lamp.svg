@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 840" role="img" aria-label="Orange trail lamp">
+  <rect width="800" height="840" fill="#e8c93e"/>
+  <g fill="none" stroke="#171713" opacity=".3"><circle cx="400" cy="432" r="260"/><circle cx="400" cy="432" r="205"/><circle cx="400" cy="432" r="150"/></g>
+  <path d="M293 229c0-59 48-107 107-107s107 48 107 107" fill="none" stroke="#171713" stroke-width="24"/>
+  <path d="M252 298c0-42 34-76 76-76h144c42 0 76 34 76 76v336c0 46-37 83-83 83H335c-46 0-83-37-83-83V298Z" fill="#f0562b" stroke="#171713" stroke-width="8"/>
+  <rect x="288" y="349" width="224" height="201" rx="20" fill="#fff5c6" stroke="#171713" stroke-width="7"/>
+  <path d="M314 392h172M314 435h172M314 478h172" stroke="#d4b647" stroke-width="6"/>
+  <circle cx="400" cy="626" r="25" fill="#171713"/><path d="M367 273h66" stroke="#171713" stroke-width="10"/>
+</svg>

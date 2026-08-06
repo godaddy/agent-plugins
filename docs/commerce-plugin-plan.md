@@ -1,10 +1,23 @@
 # Commerce Agent Plugin plan
 
-Status: Draft
+Status: Implementation in progress
 
 Target portable specification: Agent Plugins 1.0.0 (currently a Working Draft)
 
 Proposed first plugin: `commerce`
+
+## Implementation snapshot
+
+The repository now contains the portable manifest, credential-free Commerce MCP
+connection, independently valid `storefront` and `payments` skills, local
+validation, CI, and a runnable reference storefront. The reference app supports
+an explicit fixture catalog and demo checkout for deterministic verification,
+plus an opt-in server-side Commerce MCP catalog adapter. Live payment writes are
+intentionally absent until an approved provider contract is selected.
+
+Governance, official schema validation in CI, authenticated multi-client MCP
+smoke tests, provider sandbox checkout, license selection, and release ownership
+remain pre-release gates rather than implied completed work.
 
 ## Outcome
 
