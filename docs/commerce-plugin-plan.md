@@ -119,8 +119,8 @@ Proposed `plugins/commerce/plugin.json`:
   "author": {
     "name": "GoDaddy"
   },
-  "homepage": "https://github.com/godaddy/agent-plugins/tree/main/plugins/commerce",
-  "repository": "https://github.com/godaddy/agent-plugins",
+  "homepage": "https://github.com/godaddy/commerce-agent-plugin/tree/main/plugins/commerce",
+  "repository": "https://github.com/godaddy/commerce-agent-plugin",
   "keywords": ["godaddy", "commerce", "storefront", "payments", "transactions", "mcp"]
 }
 ```
@@ -199,7 +199,8 @@ depend on another skill being loaded.
 
 ### Phase 0 — Governance and public-release boundary
 
-- Confirm that `godaddy/agent-plugins` is a multi-plugin public collection.
+- Confirm that `godaddy/commerce-agent-plugin` is the public, Commerce-only
+  plugin repository.
 - Select the approved open-source license and code owners.
 - Identify the maintainers for the plugin, Commerce MCP service, and security
   review.

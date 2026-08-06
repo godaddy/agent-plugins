@@ -243,7 +243,7 @@ async function validateMarketplace() {
 
 async function validateInstallationDocs() {
   const readme = await readFile(resolve(root, "README.md"), "utf8");
-  const gitInstall = "codex plugin marketplace add https://github.com/godaddy/agent-plugins.git";
+  const gitInstall = "codex plugin marketplace add https://github.com/godaddy/commerce-agent-plugin.git";
   if (!readme.includes(gitInstall)) {
     fail("README.md must document direct installation from the Git marketplace URL.");
   }

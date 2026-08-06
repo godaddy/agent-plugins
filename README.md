@@ -20,7 +20,7 @@ Add the GitHub repository directly as the GoDaddy marketplace, then install its
 only plugin. A local clone is not required:
 
 ```bash
-codex plugin marketplace add https://github.com/godaddy/agent-plugins.git
+codex plugin marketplace add https://github.com/godaddy/commerce-agent-plugin.git
 codex plugin add commerce@godaddy
 ```
 
@@ -38,7 +38,7 @@ marketplace source once before using the Git URL:
 ```bash
 codex plugin remove commerce@godaddy
 codex plugin marketplace remove godaddy
-codex plugin marketplace add https://github.com/godaddy/agent-plugins.git
+codex plugin marketplace add https://github.com/godaddy/commerce-agent-plugin.git
 codex plugin add commerce@godaddy
 ```
 
