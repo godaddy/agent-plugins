@@ -1,8 +1,22 @@
 # Commerce MCP workflow
 
+## Boundary
+
+Use Commerce MCP while the agent provisions or selects a store/channel, manages
+catalog data, inspects merchant orders, configures integrations, or validates a
+checkout implementation. Do not assume an MCP tool is the generated
+application's shopper-runtime API.
+
+The current MCP surface does not create a draft-order cart or a hosted checkout
+session. `commerce_orders_search` and `commerce_orders_get` are read-only. Build
+shopper catalog and cart traffic against the runtime APIs in
+[runtime-api-map.md](runtime-api-map.md), and route session creation through the
+payments skill.
+
 ## Connection
 
-Use Streamable HTTP from the application backend. Known endpoints are:
+Use Streamable HTTP from the agent host or a deliberate server-side control-plane
+integration. Never initialize this client in browser code. Known endpoints are:
 
 - production: `https://mcp.commerce.api.godaddy.com/mcp`
 - development: `https://mcp.commerce.api.dev-godaddy.com/mcp`
@@ -28,6 +42,19 @@ Reuse the MCP session for discovery and the calls enabled by that discovery.
 Never maintain an exhaustive tool catalog in application code. Current catalog
 reads commonly include `catalog_sku_group_search` and
 `catalog_sku_group_get`, but discovery is authoritative.
+
+## Capability routing
+
+| Need | MCP route |
+| --- | --- |
+| Select or create a store | Core `commerce_store_list`, `commerce_store_get`, or `commerce_store_setup` |
+| Resolve/register a sales channel | Core `commerce_store_channels_get` or `commerce_app_channel_ensure` |
+| Find/read/write catalog data | Discover the current `catalog_*` tool with `search_tools` |
+| Inspect merchant orders | Discover `commerce_orders_search` or `commerce_orders_get` |
+| Resolve tax/shipping checkout flags | Core `commerce_checkout_configuration_get` when enabled |
+| Prove an implemented checkout works | Core `commerce_checkout_validate` and its returned runtime plan |
+| Serve shopper catalog/cart traffic | Not MCP; use the storefront runtime APIs |
+| Create a hosted checkout session | Not MCP; activate the payments skill |
 
 ## Product read pattern
 

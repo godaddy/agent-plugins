@@ -1,0 +1,20 @@
+{
+  "name": "godaddy",
+  "interface": {
+    "displayName": "GoDaddy"
+  },
+  "plugins": [
+    {
+      "name": "commerce",
+      "source": {
+        "source": "local",
+        "path": "./plugins/commerce"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

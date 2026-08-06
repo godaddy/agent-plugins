@@ -1,7 +1,7 @@
 # Commerce plugin
 
-`commerce` is a portable Agent Plugin for building and operating commerce
-experiences. It contains two independently usable skills:
+`commerce` is the repository's only Agent Plugin. It builds and operates
+commerce experiences through two independently usable skills:
 
 - `storefront` guides catalog, product-detail, cart, order, and storefront UI
   work. It can discover GoDaddy Commerce capabilities through the bundled MCP
@@ -10,10 +10,19 @@ experiences. It contains two independently usable skills:
   verification, refunds, voids, and transaction reads without assuming an API
   supports writes it does not expose.
 
-The package uses the Agent Plugins 1.0.0 working-draft layout. Install this
-directory as the plugin root in a compatible client. The MCP entry contains no
-credentials; authentication is performed by the client through its secure OAuth
-flow.
+The package includes the Agent Plugins 1.0.0 working-draft files
+(`plugin.json`, `mcp.json`) and native Codex files
+(`.codex-plugin/plugin.json`, `.mcp.json`). Both target the same skills and
+production MCP endpoint. Authentication is performed by the client through its
+secure authorization-code + PKCE flow. The Codex package contains the
+pre-registered public OAuth client ID but no client secret or user credential.
+It requests the OIDC identity and offline refresh scopes plus the Commerce and
+App Registry read scopes provisioned for the public client.
+
+For Codex, install the repository marketplace and the `commerce@godaddy`
+plugin. Start a new thread after installation so Codex loads both skills and
+the MCP connection. Configure Codex's global callback URL as documented in the
+repository README before running `codex mcp login commerce`.
 
 ## What the skills deliberately enforce
 
@@ -31,7 +40,7 @@ credentials are provided.
 
 ## Endpoints
 
-The portable MCP configuration targets production:
+Both MCP configurations target production:
 
 ```text
 https://mcp.commerce.api.godaddy.com/mcp

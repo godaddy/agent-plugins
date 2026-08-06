@@ -2,17 +2,18 @@
 
 Status: Implementation in progress
 
-Target portable specification: Agent Plugins 1.0.0 (currently a Working Draft)
+Target specifications: Agent Plugins 1.0.0 working draft and native Codex plugins
 
 Proposed first plugin: `commerce`
 
 ## Implementation snapshot
 
-The repository now contains the portable manifest, credential-free Commerce MCP
-connection, independently valid `storefront` and `payments` skills, local
-validation, CI, and a runnable reference storefront. The reference app supports
-an explicit fixture catalog and demo checkout for deterministic verification,
-plus an opt-in server-side Commerce MCP catalog adapter. Live payment writes are
+The repository contains one Commerce plugin with portable and Codex manifests,
+a credential-free Commerce MCP connection, independently valid `storefront`
+and `payments` skills, a one-entry GoDaddy marketplace, local validation, CI,
+and a runnable reference storefront. The reference app supports an explicit
+fixture catalog and demo checkout for deterministic verification, plus an
+opt-in server-side Commerce MCP catalog adapter. Live payment writes are
 intentionally absent until an approved provider contract is selected.
 
 Governance, official schema validation in CI, authenticated multi-client MCP
@@ -21,8 +22,8 @@ remain pre-release gates rather than implied completed work.
 
 ## Outcome
 
-Publish an installable, vendor-neutral Agent Plugin that helps compatible AI
-clients use GoDaddy Commerce safely and consistently. The plugin will package:
+Publish one installable Commerce Agent Plugin that helps compatible AI clients
+use GoDaddy Commerce safely and consistently. The plugin packages:
 
 - a `storefront` Agent Skill for non-payment Commerce workflows;
 - an isolated `payments` Agent Skill for transactions and monetary movement;
@@ -37,15 +38,16 @@ specification deliberately leaves distribution and installation to clients.
 
 ## Decisions
 
-1. **Use this repository as a collection.** Repository-level documentation,
-   validation, and release automation live at the root. Each portable package
-   lives under `plugins/<plugin-name>/`.
-2. **Name the first package `commerce`.** It satisfies the v1 naming rules and
+1. **Keep this repository Commerce-only.** Repository-level documentation,
+   validation, examples, and release automation live at the root. The only
+   plugin package is `plugins/commerce/`, and the GoDaddy marketplace contains
+   only that entry.
+2. **Name the package `commerce`.** It satisfies the v1 naming rules and
    matches the product surface without repeating the publisher name.
-3. **Make the portable contract primary.** The package has root-level
-   `plugin.json`, optional root-level `mcp.json`, and immediate child skills
-   under `skills/`. Do not substitute a client-specific
-   `.codex-plugin/plugin.json` manifest.
+3. **Ship portable and Codex entry points together.** The package keeps the
+   vendor-neutral `plugin.json` and `mcp.json` while also providing
+   `.codex-plugin/plugin.json` and `.mcp.json`. Both formats point at the same
+   `skills/` directory and production Commerce MCP server.
 4. **Start with the production MCP endpoint.** The portable package points to
    `https://mcp.commerce.api.godaddy.com/mcp`. Development and test endpoints
    should remain separate fixtures or client-local overrides, not hidden
@@ -71,6 +73,7 @@ specification deliberately leaves distribution and installation to clients.
 
 ```text
 agent-plugins/
+├── .agents/plugins/marketplace.json
 ├── README.md
 ├── CONTRIBUTING.md
 ├── LICENSE
@@ -80,6 +83,8 @@ agent-plugins/
 │   └── releasing.md
 ├── plugins/
 │   └── commerce/
+│       ├── .codex-plugin/plugin.json
+│       ├── .mcp.json
 │       ├── plugin.json
 │       ├── mcp.json
 │       ├── README.md
@@ -98,8 +103,8 @@ agent-plugins/
     └── scenarios/
 ```
 
-The repository root is not itself a portable plugin. The installable package
-root is `plugins/commerce/`.
+The repository root is a one-entry Codex marketplace. The installable plugin
+root for both formats is `plugins/commerce/`.
 
 ## Portable package skeleton
 
@@ -254,8 +259,10 @@ without depending on undocumented client behavior.
 
 ### Phase 4 — Client compatibility and packaging
 
-- Test package discovery in ChatGPT/Codex, VS Code, Cursor, GitHub Copilot, and
-  Kiro where practical.
+- Install the local GoDaddy marketplace in Codex, authenticate with Codex's MCP
+  OAuth flow, and test the combined plugin from a fresh thread.
+- Test portable package discovery in VS Code, Cursor, GitHub Copilot, and Kiro
+  where practical.
 - Record which clients load skills, Streamable HTTP MCP, or both; do not present
   an unsupported component as a plugin defect.
 - Add installation instructions per client without changing the portable package

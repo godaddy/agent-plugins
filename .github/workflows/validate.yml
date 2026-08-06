@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: 22
       - run: corepack enable
-      - name: Validate portable package
+      - name: Validate Commerce plugin packages
         run: node scripts/validate.mjs
       - name: Install reference app
         run: pnpm --dir examples/storefront install --frozen-lockfile

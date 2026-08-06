@@ -25,19 +25,24 @@ for correct lifecycle handling and recoverability before the happy-path demo.
    write contract is absent, stop and report the operation as unsupported rather
    than inventing fields. Read
    [references/transaction-contracts.md](references/transaction-contracts.md).
-5. Build the integration behind a same-origin backend. Recalculate amount and
+5. For GoDaddy Commerce hosted checkout, follow the exact server-side API,
+   authentication, session-input, redirect, and verification contract in
+   [references/godaddy-hosted-checkout.md](references/godaddy-hosted-checkout.md).
+   Do not mistake MCP checkout configuration or readiness tools for session
+   creation.
+6. Build the integration behind a same-origin backend. Recalculate amount and
    currency from server-owned product/order data, validate ownership and bounds,
    use idempotency, keep secrets out of logs and browser bundles, and constrain
    redirect origins. Read
    [references/security.md](references/security.md).
-6. Model authorization, capture, failure, cancellation, expiry, refund, void,
+7. Model authorization, capture, failure, cancellation, expiry, refund, void,
    dispute, and asynchronous transitions explicitly. The browser return is an
    observation, never payment proof. Follow
    [references/lifecycle.md](references/lifecycle.md).
-7. Make webhooks authentic, replay-safe, order-independent where possible, and
+8. Make webhooks authentic, replay-safe, order-independent where possible, and
    auditable. Fetch server-side status when a return needs immediate resolution;
    keep uncertain states pending.
-8. Verify contract tests, duplicate requests/events, retries, timeouts, partial
+9. Verify contract tests, duplicate requests/events, retries, timeouts, partial
    refunds, out-of-order events, and a real provider sandbox path. Use
    [references/verification.md](references/verification.md).
 
@@ -53,6 +58,10 @@ for correct lifecycle handling and recoverability before the happy-path demo.
   event whose signature and applicability were not verified.
 - Never retry a money-moving request without a stable idempotency key and a
   reconciliation plan.
+- Never use the interactive Commerce MCP OAuth token as a generated
+  application's runtime checkout credential.
+- Never call hosted checkout GraphQL from browser code or trust browser-supplied
+  store, channel, price, currency, provider flags, or absolute return URLs.
 - Never implement capture, refund, or void from a read-only transaction schema.
 - Never conflate authorization with capture, void with refund, or payment success
   with order fulfillment.
