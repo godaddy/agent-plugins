@@ -1,12 +1,12 @@
 {
-  "name": "commerce",
-  "version": "0.1.0+codex.20260806223514",
-  "description": "Build safe storefronts and payment flows with GoDaddy Commerce.",
+  "name": "godaddy",
+  "version": "0.1.0+codex.20260806225047",
+  "description": "Build with GoDaddy using Commerce skills and production MCP capabilities.",
   "author": {
     "name": "GoDaddy",
     "url": "https://www.godaddy.com/"
   },
-  "homepage": "https://github.com/godaddy/commerce-agent-plugin/tree/main/plugins/commerce",
+  "homepage": "https://github.com/godaddy/commerce-agent-plugin",
   "repository": "https://github.com/godaddy/commerce-agent-plugin",
   "keywords": [
     "godaddy",
@@ -19,9 +19,9 @@
   "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
-    "displayName": "GoDaddy Commerce",
-    "shortDescription": "Build storefront and payment experiences",
-    "longDescription": "Use GoDaddy Commerce skills and MCP tools to build production storefronts, integrate catalog data, design secure checkout handoffs, and implement payment flows from approved provider contracts.",
+    "displayName": "GoDaddy",
+    "shortDescription": "Build GoDaddy-powered digital experiences",
+    "longDescription": "Use GoDaddy skills and production MCP tools to build digital experiences. The initial Commerce skills cover dynamic storefronts, catalog integration, secure checkout handoffs, and payment flows.",
     "developerName": "GoDaddy",
     "category": "Developer Tools",
     "capabilities": [

@@ -1,91 +1,103 @@
-# GoDaddy Commerce Agent Plugin
+# GoDaddy AI Toolkit
 
-This repository publishes one installable plugin: `commerce`. It combines a
-Storefront skill, a dedicated Payments skill, and GoDaddy Commerce's remote MCP
-server. No unrelated plugins belong in this repository or its marketplace.
-All bundled GoDaddy Commerce connections use public production endpoints; users
-do not select or configure service origins.
-
-The package supports both the vendor-neutral [Agent Plugins 1.0.0 working
-draft](https://agent-plugins.org/specification) and the native [Codex plugin
-format](https://developers.openai.com/plugins/build/plugins).
+One installable `godaddy` agent plugin for building with GoDaddy. The toolkit
+starts with two Commerce skills and the production GoDaddy Commerce MCP server:
 
 ```text
-plugins/commerce/skills/storefront  catalog, PDP, cart, and checkout handoff
-plugins/commerce/skills/payments    payment lifecycle and transaction work
-examples/storefront                 runnable reference implementation
+skills/storefront    catalog, product detail, cart, and checkout handoff
+skills/payments      checkout, payment lifecycle, and transaction work
+examples/storefront  runnable reference implementation
 ```
+
+The repository root is the plugin root. Future GoDaddy capabilities belong in
+this same plugin as additional skills and MCP connections; they should not be
+packaged as nested product plugins.
 
 ## Install in Codex
 
-Add the GitHub repository directly as the GoDaddy marketplace, then install its
-only plugin. A local clone is not required:
+Install directly from GitHub:
 
 ```bash
 codex plugin marketplace add https://github.com/godaddy/commerce-agent-plugin.git
-codex plugin add commerce@godaddy
+codex plugin add godaddy@godaddy-ai-toolkit
 ```
 
-Codex clones and tracks the marketplace in its own plugin cache. To refresh a
-Git-backed installation after a release, run:
-
-```bash
-codex plugin marketplace upgrade godaddy
-codex plugin add commerce@godaddy
-```
-
-If `godaddy` was previously configured from a local checkout, replace that
-marketplace source once before using the Git URL:
-
-```bash
-codex plugin remove commerce@godaddy
-codex plugin marketplace remove godaddy
-codex plugin marketplace add https://github.com/godaddy/commerce-agent-plugin.git
-codex plugin add commerce@godaddy
-```
-
-Codex performs authorization-code OAuth with PKCE for the bundled Streamable
-HTTP server. The plugin includes GoDaddy Commerce's pre-registered public
-client ID, so Codex does not use dynamic client registration. No client secret
-belongs in the plugin.
-
-The GoDaddy OAuth client uses a fixed localhost callback. Add these top-level
-settings to `~/.codex/config.toml`:
+The plugin contains a pre-registered public OAuth client and requests its
+provisioned identity and read scopes. It contains no client secret or user
+credential. Configure Codex's localhost OAuth callback once in
+`~/.codex/config.toml`:
 
 ```toml
 mcp_oauth_callback_port = 6274
 mcp_oauth_callback_url = "http://localhost:6274/"
 ```
 
-For this MCP URL, Codex derives the registered redirect URI
-`http://localhost:6274/IhM2a8vIl6u-`. The plugin requests the OIDC identity and
-offline refresh scopes plus the Commerce and App Registry read scopes
-provisioned for its public client. Log in with:
+Register the derived redirect URI
+`http://localhost:6274/IhM2a8vIl6u-` for this public client.
+
+Then authenticate the bundled Commerce connection:
 
 ```bash
 codex mcp login commerce
 ```
 
-Start a new Codex thread after installation or an update so it loads the
-`commerce:storefront` and `commerce:payments` skills and the Commerce MCP tools.
-OAuth credentials remain in Codex's credential store; do not copy tokens into
-this repository.
+To pick up a release from the Git-backed marketplace, run:
 
-## Other compatible agents
+```bash
+codex plugin marketplace upgrade godaddy-ai-toolkit
+codex plugin add godaddy@godaddy-ai-toolkit
+```
 
-Install the Git repository and select `plugins/commerce/` as the plugin root.
-Its portable `plugin.json` and `mcp.json` declare the same two skills and
-production MCP endpoint without credentials.
+If the former `commerce@godaddy` package is installed, migrate it once:
+
+```bash
+codex plugin remove commerce@godaddy
+codex plugin marketplace remove godaddy
+codex plugin marketplace add https://github.com/godaddy/commerce-agent-plugin.git
+codex plugin add godaddy@godaddy-ai-toolkit
+```
+
+Start a new thread after installation or an update. Codex will load the
+`godaddy:storefront` and `godaddy:payments` skills and the Commerce MCP tools.
+
+## Host entry points
+
+The root layout follows the same one-toolkit pattern across agent hosts:
+
+- `.agents/plugins/marketplace.json` and `.codex-plugin/plugin.json` for Codex
+- `.claude-plugin/` for Claude Code
+- `.cursor-plugin/` for Cursor
+- `gemini-extension.json` for Gemini CLI
+- `plugin.json` and `mcp.json` for Agent Plugins-compatible hosts
+- `package.json#pi.skills` for Pi
+
+Install this repository root when a host supports installing a plugin from a
+Git URL. The skills contain the workflow knowledge; the MCP connection exposes
+account-specific Commerce capabilities. Hosts remain responsible for OAuth and
+credential storage.
+
+## Production boundary
+
+All bundled GoDaddy connections use fixed public production endpoints. Users
+do not need to know or configure service origins. The storefront example uses
+localhost only for its own development server and is visibly fixture-backed by
+default; it never silently substitutes fixtures for a failed live request.
 
 ## Validate
 
-Run `npm run validate` to check that the repository contains only the Commerce
-plugin and that its marketplace, portable manifests, Codex manifests, skills,
-containment, UI metadata, and relative links agree. The reference app has its
-own test, typecheck, and build commands.
+Run:
 
-See [the implementation plan](docs/commerce-plugin-plan.md) for scope, package
-design, release gates, and remaining governance work.
+```bash
+npm run validate
+```
 
-> Status: pre-release implementation. The plugin is usable for evaluation but
-> has not completed the public-release governance and compatibility gates.
+This checks the single root plugin, cross-host manifest agreement, marketplace
+sources, Commerce skills, OAuth configuration, relative links, and the public
+production boundary. The reference storefront has separate tests, typechecks,
+and a production build.
+
+See [the toolkit plan](docs/toolkit-plan.md) for the architecture and expansion
+rules.
+
+> Status: pre-release. Public-release governance and cross-host compatibility
+> testing are still required.

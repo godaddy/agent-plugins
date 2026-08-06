@@ -1,14 +1,14 @@
 {
-  "name": "godaddy",
+  "name": "godaddy-ai-toolkit",
   "interface": {
     "displayName": "GoDaddy"
   },
   "plugins": [
     {
-      "name": "commerce",
+      "name": "godaddy",
       "source": {
-        "source": "local",
-        "path": "./plugins/commerce"
+        "source": "url",
+        "url": "https://github.com/godaddy/commerce-agent-plugin.git"
       },
       "policy": {
         "installation": "AVAILABLE",
