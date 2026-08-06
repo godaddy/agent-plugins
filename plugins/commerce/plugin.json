@@ -6,8 +6,8 @@
   "author": {
     "name": "GoDaddy"
   },
-  "homepage": "https://github.com/godaddy/agent-plugins/tree/main/plugins/commerce",
-  "repository": "https://github.com/godaddy/agent-plugins",
+  "homepage": "https://github.com/godaddy/commerce-agent-plugin/tree/main/plugins/commerce",
+  "repository": "https://github.com/godaddy/commerce-agent-plugin",
   "keywords": [
     "godaddy",
     "commerce",

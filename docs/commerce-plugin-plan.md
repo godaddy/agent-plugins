@@ -119,8 +119,8 @@ Proposed `plugins/commerce/plugin.json`:
   "author": {
     "name": "GoDaddy"
   },
-  "homepage": "https://github.com/godaddy/agent-plugins/tree/main/plugins/commerce",
-  "repository": "https://github.com/godaddy/agent-plugins",
+  "homepage": "https://github.com/godaddy/commerce-agent-plugin/tree/main/plugins/commerce",
+  "repository": "https://github.com/godaddy/commerce-agent-plugin",
   "keywords": ["godaddy", "commerce", "storefront", "payments", "transactions", "mcp"]
 }
 ```
@@ -199,7 +199,8 @@ depend on another skill being loaded.
 
 ### Phase 0 — Governance and public-release boundary
 
-- Confirm that `godaddy/agent-plugins` is a multi-plugin public collection.
+- Confirm that `godaddy/commerce-agent-plugin` is the public, Commerce-only
+  plugin repository.
 - Select the approved open-source license and code owners.
 - Identify the maintainers for the plugin, Commerce MCP service, and security
   review.
@@ -259,8 +260,9 @@ without depending on undocumented client behavior.
 
 ### Phase 4 — Client compatibility and packaging
 
-- Install the local GoDaddy marketplace in Codex, authenticate with Codex's MCP
-  OAuth flow, and test the combined plugin from a fresh thread.
+- Install the GoDaddy marketplace in Codex directly from its Git URL,
+  authenticate with Codex's MCP OAuth flow, and test the combined plugin from a
+  fresh thread. Keep local-path installation only as a development workflow.
 - Test portable package discovery in VS Code, Cursor, GitHub Copilot, and Kiro
   where practical.
 - Record which clients load skills, Streamable HTTP MCP, or both; do not present

@@ -1,13 +1,13 @@
 {
   "name": "commerce",
-  "version": "0.1.0+codex.20260806202207",
+  "version": "0.1.0+codex.20260806205624",
   "description": "Build safe storefronts and payment flows with GoDaddy Commerce.",
   "author": {
     "name": "GoDaddy",
     "url": "https://www.godaddy.com/"
   },
-  "homepage": "https://github.com/godaddy/agent-plugins/tree/main/plugins/commerce",
-  "repository": "https://github.com/godaddy/agent-plugins",
+  "homepage": "https://github.com/godaddy/commerce-agent-plugin/tree/main/plugins/commerce",
+  "repository": "https://github.com/godaddy/commerce-agent-plugin",
   "keywords": [
     "godaddy",
     "commerce",

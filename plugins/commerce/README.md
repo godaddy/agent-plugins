@@ -19,8 +19,9 @@ pre-registered public OAuth client ID but no client secret or user credential.
 It requests the OIDC identity and offline refresh scopes plus the Commerce and
 App Registry read scopes provisioned for the public client.
 
-For Codex, install the repository marketplace and the `commerce@godaddy`
-plugin. Start a new thread after installation so Codex loads both skills and
+For Codex, add `https://github.com/godaddy/commerce-agent-plugin.git` as a Git
+marketplace and install the `commerce@godaddy` plugin. No local clone is
+required. Start a new thread after installation so Codex loads both skills and
 the MCP connection. Configure Codex's global callback URL as documented in the
 repository README before running `codex mcp login commerce`.
 
@@ -33,7 +34,7 @@ repository README before running `codex mcp login commerce`.
 - A browser return URL is never accepted as definitive proof of payment.
 - Payment writes are implemented only from an approved provider contract.
 
-See the repository's [reference storefront](https://github.com/godaddy/agent-plugins/tree/main/examples/storefront)
+See the repository's [reference storefront](https://github.com/godaddy/commerce-agent-plugin/tree/main/examples/storefront)
 for an app that uses the same rules. It runs with conspicuously labeled fixtures
 by default and can read catalog data from Commerce MCP when server-side
 credentials are provided.

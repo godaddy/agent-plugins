@@ -241,6 +241,20 @@ async function validateMarketplace() {
   if (!entry.category) fail("The commerce marketplace entry needs a category.");
 }
 
+async function validateInstallationDocs() {
+  const readme = await readFile(resolve(root, "README.md"), "utf8");
+  const gitInstall = "codex plugin marketplace add https://github.com/godaddy/commerce-agent-plugin.git";
+  if (!readme.includes(gitInstall)) {
+    fail("README.md must document direct installation from the Git marketplace URL.");
+  }
+  if (!readme.includes("codex plugin add commerce@godaddy")) {
+    fail("README.md must document installation of commerce@godaddy.");
+  }
+  if (readme.includes("codex plugin marketplace add /absolute/path")) {
+    fail("README.md must not present a local checkout as the primary installation path.");
+  }
+}
+
 const entries = await readdir(pluginsRoot, { withFileTypes: true }).catch(() => []);
 const pluginEntries = entries.filter((entry) => entry.isDirectory());
 if (pluginEntries.length !== 1 || pluginEntries[0]?.name !== "commerce") {
@@ -251,6 +265,7 @@ for (const entry of pluginEntries) {
 }
 if (pluginCount === 0) fail("No plugins found.");
 await validateMarketplace();
+await validateInstallationDocs();
 
 if (errors.length > 0) {
   console.error(errors.map((error) => `- ${error}`).join("\n"));
