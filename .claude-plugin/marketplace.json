@@ -10,7 +10,7 @@
     {
       "name": "godaddy",
       "source": "./",
-      "description": "Build GoDaddy-powered experiences with Commerce storefront and payments skills.",
+      "description": "Build GoDaddy-powered experiences with Domains CLI, storefront, and payments skills.",
       "version": "0.1.0",
       "author": {
         "name": "GoDaddy"
@@ -18,6 +18,9 @@
       "homepage": "https://github.com/godaddy/commerce-agent-plugin",
       "keywords": [
         "godaddy",
+        "domains",
+        "dns",
+        "cli",
         "commerce",
         "storefront",
         "payments",

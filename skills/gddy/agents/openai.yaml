@@ -1,0 +1,4 @@
+interface:
+  display_name: "GoDaddy CLI"
+  short_description: "Operate GoDaddy domains safely with gddy"
+  default_prompt: "Use $gddy to manage my GoDaddy domains safely with the CLI."

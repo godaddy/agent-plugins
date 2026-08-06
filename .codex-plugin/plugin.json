@@ -1,7 +1,7 @@
 {
   "name": "godaddy",
-  "version": "0.1.0+codex.20260806225047",
-  "description": "Build with GoDaddy using Commerce skills and production MCP capabilities.",
+  "version": "0.1.0+codex.20260806231842",
+  "description": "Build with GoDaddy using Domains CLI, Commerce skills, and production MCP capabilities.",
   "author": {
     "name": "GoDaddy",
     "url": "https://www.godaddy.com/"
@@ -10,6 +10,9 @@
   "repository": "https://github.com/godaddy/commerce-agent-plugin",
   "keywords": [
     "godaddy",
+    "domains",
+    "dns",
+    "cli",
     "commerce",
     "storefront",
     "payments",
@@ -21,20 +24,20 @@
   "interface": {
     "displayName": "GoDaddy",
     "shortDescription": "Build GoDaddy-powered digital experiences",
-    "longDescription": "Use GoDaddy skills and production MCP tools to build digital experiences. The initial Commerce skills cover dynamic storefronts, catalog integration, secure checkout handoffs, and payment flows.",
+    "longDescription": "Use GoDaddy skills, the gddy Domains CLI, and production MCP tools to find and manage domains, build dynamic storefronts, integrate catalogs, and implement secure checkout and payment flows.",
     "developerName": "GoDaddy",
     "category": "Developer Tools",
     "capabilities": [
       "Read",
       "Write"
     ],
-    "websiteURL": "https://www.godaddy.com/commerce",
+    "websiteURL": "https://developer.godaddy.com/en",
     "privacyPolicyURL": "https://www.godaddy.com/legal/agreements/privacy-policy",
     "termsOfServiceURL": "https://www.godaddy.com/legal/agreements/universal-terms-of-service-agreement",
     "defaultPrompt": [
+      "Find and safely register a domain with gddy.",
       "Build a storefront from my GoDaddy Commerce catalog.",
-      "Add a secure checkout and payment flow.",
-      "Audit this commerce UI for catalog and payment correctness."
+      "Add a secure checkout and payment flow."
     ],
     "brandColor": "#09757A"
   }
