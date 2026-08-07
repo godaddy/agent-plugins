@@ -54,13 +54,13 @@ rather than inventing a CLI form.
 
 | Need | Preferred surface |
 |---|---|
-| Public domain suggestions or availability with no account | GoDaddy Domains MCP |
+| Public domain suggestions or availability with no account | Bundled `godaddy-domains` MCP |
 | Interactive account-aware domain or DNS work | `gddy` |
 | Application code, CI, or an operation absent from `gddy` | Domains REST API |
-| Storefront catalog, orders, or checkout readiness | Commerce MCP and the storefront skill |
+| Storefront catalog, orders, or checkout readiness | Bundled `godaddy-commerce` MCP and the storefront skill |
 | Charges, captures, refunds, or payment-provider state | Payments skill and an approved provider contract |
 
-The public Domains MCP server is read-only and uses
+The bundled `godaddy-domains` MCP server is public and read-only. It uses
 `https://api.godaddy.com/v1/domains/mcp`. It cannot purchase domains or modify
 DNS. For REST integration, fetch the current contracts instead of copying
 remembered schemas:

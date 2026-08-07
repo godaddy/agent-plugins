@@ -1,11 +1,13 @@
 # GoDaddy AI Toolkit
 
 One installable `godaddy` agent plugin for building with GoDaddy. The toolkit
-starts with the GoDaddy Domains CLI skill, two Commerce skills, and the
-production GoDaddy Commerce MCP server:
+includes a domain-lifecycle skill, the public Domains MCP and CLI, Node.js
+Hosting, two Commerce skills, and the production GoDaddy Commerce MCP server:
 
 ```text
 skills/gddy          domain search, registration, and DNS through the CLI
+skills/domains       domain outcomes across MCP, CLI, and production REST
+skills/hosting       Node.js app creation, source, secrets, deploys, and logs
 skills/storefront    catalog, product detail, cart, and checkout handoff
 skills/payments      checkout, payment lifecycle, and transaction work
 examples/storefront  runnable reference implementation
@@ -40,8 +42,13 @@ Register the derived redirect URI
 Then authenticate the bundled Commerce connection:
 
 ```bash
-codex mcp login commerce
+codex mcp login godaddy-commerce
 ```
+
+The bundled `godaddy-domains` MCP needs no login. It provides public domain
+availability and suggestion tools. The `domains` skill routes account-aware
+work to the separately authenticated `gddy` CLI for interactive operations or
+to the production Domains REST API for application code and automation.
 
 To pick up a release from the Git-backed marketplace, run:
 
@@ -60,9 +67,13 @@ codex plugin add godaddy@godaddy-ai-toolkit
 ```
 
 Start a new thread after installation or an update. Codex will load the
-`godaddy:gddy`, `godaddy:storefront`, and `godaddy:payments` skills and the
-Commerce MCP tools. The `gddy` skill checks the locally installed CLI and guides
-its separate browser authentication only when a domain task needs it.
+`godaddy:gddy`, `godaddy:domains`, `godaddy:hosting`, `godaddy:storefront`, and
+`godaddy:payments` skills plus the Domains and Commerce MCP tools. The `domains`
+skill selects MCP, CLI, or REST for a complete domain lifecycle; `gddy` checks
+the locally installed CLI and guides its separate browser authentication only
+when an interactive account task needs it. The `hosting` skill uses server-held
+OAuth client credentials for the fixed public production Node.js Hosting REST
+API.
 
 ## Host entry points
 
@@ -76,9 +87,12 @@ The root layout follows the same one-toolkit pattern across agent hosts:
 - `package.json#pi.skills` for Pi
 
 Install this repository root when a host supports installing a plugin from a
-Git URL. The skills contain workflow knowledge; `gddy` provides account-aware
-Domains operations and the MCP connection exposes account-specific Commerce
-capabilities. Hosts remain responsible for OAuth and credential storage.
+Git URL. The skills contain workflow knowledge; `domains` routes complete domain
+outcomes, `gddy` provides interactive account operations, the public Domains MCP
+handles unauthenticated discovery, `hosting` guides production Node.js Hosting
+REST workflows, and the Commerce MCP exposes account-specific capabilities.
+Hosts and generated applications remain responsible for OAuth and credential
+storage.
 
 ## Production boundary
 

@@ -1,9 +1,13 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
   "mcpServers": {
-    "commerce": {
+    "godaddy-commerce": {
       "type": "streamable-http",
       "url": "https://mcp.commerce.api.godaddy.com/mcp"
+    },
+    "godaddy-domains": {
+      "type": "streamable-http",
+      "url": "https://api.godaddy.com/v1/domains/mcp"
     }
   }
 }

@@ -1,0 +1,11 @@
+interface:
+  display_name: "GoDaddy Domains"
+  short_description: "Manage domains, DNS, and registrations"
+  default_prompt: "Use $domains to find, register, configure, and safely manage my GoDaddy domains."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "godaddy-domains"
+      description: "Public GoDaddy domain suggestions and availability"
+      transport: "streamable_http"
+      url: "https://api.godaddy.com/v1/domains/mcp"

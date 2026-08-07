@@ -1,0 +1,4 @@
+interface:
+  display_name: "GoDaddy Hosting"
+  short_description: "Deploy and operate GoDaddy Node.js apps"
+  default_prompt: "Use $hosting to deploy and operate my Node.js app on GoDaddy Hosting."

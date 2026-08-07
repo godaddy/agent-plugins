@@ -1,6 +1,6 @@
 {
   "name": "godaddy",
-  "description": "GoDaddy tools for Cursor, including the Domains CLI plus Commerce storefront and payments skills.",
+  "description": "GoDaddy tools for Cursor, including Domains, Node.js Hosting, storefront, and payments skills.",
   "version": "0.1.0",
   "author": {
     "name": "GoDaddy"
@@ -12,6 +12,9 @@
     "domains",
     "dns",
     "cli",
+    "hosting",
+    "nodejs",
+    "deployment",
     "commerce",
     "storefront",
     "payments",

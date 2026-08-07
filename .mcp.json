@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "commerce": {
+    "godaddy-commerce": {
       "type": "http",
       "url": "https://mcp.commerce.api.godaddy.com/mcp",
       "oauth": {
@@ -19,6 +19,10 @@
         "commerce.onboarding-application:read",
         "apps.app-registry:read"
       ]
+    },
+    "godaddy-domains": {
+      "type": "http",
+      "url": "https://api.godaddy.com/v1/domains/mcp"
     }
   }
 }

@@ -1,7 +1,7 @@
 {
   "name": "godaddy",
-  "version": "0.1.0+codex.20260806231842",
-  "description": "Build with GoDaddy using Domains CLI, Commerce skills, and production MCP capabilities.",
+  "version": "0.1.0+codex.20260806235812",
+  "description": "Build with GoDaddy using Domains, Node.js Hosting, Commerce skills, and production MCP capabilities.",
   "author": {
     "name": "GoDaddy",
     "url": "https://www.godaddy.com/"
@@ -13,6 +13,9 @@
     "domains",
     "dns",
     "cli",
+    "hosting",
+    "nodejs",
+    "deployment",
     "commerce",
     "storefront",
     "payments",
@@ -24,7 +27,7 @@
   "interface": {
     "displayName": "GoDaddy",
     "shortDescription": "Build GoDaddy-powered digital experiences",
-    "longDescription": "Use GoDaddy skills, the gddy Domains CLI, and production MCP tools to find and manage domains, build dynamic storefronts, integrate catalogs, and implement secure checkout and payment flows.",
+    "longDescription": "Use the GoDaddy Domains skill with the public Domains MCP, gddy CLI, and production REST API; deploy applications with Node.js Hosting; and build dynamic storefronts and secure payment flows with production Commerce MCP tools.",
     "developerName": "GoDaddy",
     "category": "Developer Tools",
     "capabilities": [
@@ -35,9 +38,9 @@
     "privacyPolicyURL": "https://www.godaddy.com/legal/agreements/privacy-policy",
     "termsOfServiceURL": "https://www.godaddy.com/legal/agreements/universal-terms-of-service-agreement",
     "defaultPrompt": [
-      "Find and safely register a domain with gddy.",
-      "Build a storefront from my GoDaddy Commerce catalog.",
-      "Add a secure checkout and payment flow."
+      "Find, register, and connect a domain safely.",
+      "Deploy and operate my Node.js app on GoDaddy Hosting.",
+      "Build a storefront with secure checkout from my GoDaddy Commerce catalog."
     ],
     "brandColor": "#09757A"
   }
