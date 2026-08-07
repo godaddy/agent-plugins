@@ -6,8 +6,8 @@ Status: implementation in progress
 
 Publish one installable plugin named `godaddy`. It gives agents reusable
 GoDaddy workflow knowledge through skills and account-specific capabilities
-through production MCP servers and CLIs. The target capability areas are
-Domains, Hosting, Commerce, and GoDaddy platform apps.
+through production MCP servers, CLIs, and REST APIs. The target capability
+areas are Domains, Hosting, Commerce, and GoDaddy platform apps.
 
 The repository follows the root-plugin model used by mature AI toolkits: one
 Git URL, one plugin identity, host-specific entry points, one shared `skills/`
@@ -25,15 +25,16 @@ and install product-specific plugins.
 3. **Keep host manifests thin.** Codex, Claude Code, Cursor, Gemini CLI, Agent
    Plugins-compatible hosts, and Pi all point to the same root skills. Host
    manifests may adapt metadata but must agree on plugin name and base version.
-4. **Use MCP for live capabilities.** Skills explain how to reason and work;
-   MCP tools expose current schemas and account data. Skills must discover the
-   current tool contract instead of maintaining a copied catalog of operations.
+4. **Use the appropriate live surface.** MCP tools expose agent-oriented schemas
+   and account data, CLIs serve interactive operations, and public REST APIs
+   serve generated applications and automation. Skills must prefer current
+   contracts over remembered request shapes.
 5. **Use only public production connections.** Published manifests and skills
    contain fixed public endpoints. They expose no environment selector, service
    origin override, bearer token, or client secret.
-6. **Keep authentication client-managed.** The public OAuth client is suitable
-   for authorization code with PKCE. Hosts own login, refresh, and credential
-   storage. Generated applications must use their own runtime authentication.
+6. **Keep authentication surface-specific.** Hosts own interactive Commerce MCP
+   OAuth login, refresh, and credential storage. Generated applications and
+   Hosting automation use their own server-held runtime credentials.
 7. **Treat examples as executable evidence.** Examples verify that skill
    guidance produces complete user journeys. They are not additional plugins.
 8. **Keep skills flat.** Host discovery expects immediate children of
@@ -62,6 +63,14 @@ and install product-specific plugins.
 │   │   ├── SKILL.md
 │   │   ├── agents/openai.yaml
 │   │   └── references/
+│   ├── domains/
+│   │   ├── SKILL.md
+│   │   ├── agents/openai.yaml
+│   │   └── references/
+│   ├── hosting/
+│   │   ├── SKILL.md
+│   │   ├── agents/openai.yaml
+│   │   └── references/
 │   ├── storefront/
 │   │   ├── SKILL.md
 │   │   ├── agents/openai.yaml
@@ -82,20 +91,33 @@ Keep tooling and transport skills separate from outcome skills:
 |---|---|---|---|
 | `gddy` | Foundation | Implemented | Install, discover, authenticate, and safely operate the production Domains CLI. |
 | `godaddy-api` | Foundation | Proposed | Build direct REST integrations with current contracts, auth, pagination, retries, and idempotency. |
-| `domains` | Domains | Proposed | Search, register, configure DNS, and manage the domain lifecycle while selecting MCP, CLI, or REST appropriately. |
-| `hosting` | Hosting | Proposed | Create Node.js apps, upload source, manage secrets, deploy, inspect logs, and roll back. |
+| `domains` | Domains | Implemented | Search, register, configure DNS, and manage the domain lifecycle while selecting MCP, CLI, or REST appropriately. |
+| `hosting` | Hosting | Implemented with documented gaps | Create Node.js apps, upload source, manage secrets, deploy, inspect logs, roll back, and recover through the public production REST API. |
 | `storefront` | Commerce | Implemented | Build catalog, product, cart, checkout-handoff, and non-monetary order experiences. |
 | `payments` | Commerce | Implemented | Implement checkout sessions, money movement, provider state, webhooks, and transaction reads. |
 | `platform-apps` | Platform apps | Documentation gap | Build, register, authenticate, configure, release, install, operate, upgrade, and uninstall apps on the GoDaddy platform. |
 
-Start Domains as one skill with conditional references for discovery,
-registration, DNS, and lifecycle management. Split it only if forward tests
-show activation or context problems. Keep GoDaddy platform apps in one lifecycle
-skill, with progressive references for OAuth and scopes, actions, webhooks and
-subscriptions, UI extensions, releases, installation, and operation.
+Domains is one skill with conditional references for routing, registration,
+DNS, lifecycle management, REST contracts, and reliability. Split it only if
+forward tests show activation or context problems. Keep GoDaddy platform apps in
+one lifecycle skill, with progressive references for OAuth and scopes, actions,
+webhooks and subscriptions, UI extensions, releases, installation, and
+operation.
 
 See [the page-by-page documentation map](developer-platform-skill-map.md) for
 the source audit and ownership of every current developer page.
+
+## MCP connections
+
+- `godaddy-domains` is the public, unauthenticated, read-only Domains MCP for domain
+  availability and suggestions.
+- `godaddy-commerce` is the OAuth-authenticated Commerce MCP for account-specific
+  catalog, store, channel, order, onboarding, and application reads.
+
+Keep the public `godaddy-domains` server read-only and unauthenticated. The
+`domains` skill routes interactive account work to `gddy` and application or
+automation work to the fixed public production REST contract. Do not attach
+OAuth configuration or scopes to the public MCP server.
 
 ## Commerce capability model
 
@@ -142,10 +164,11 @@ For each new capability:
 
 - Every manifest uses plugin name `godaddy` and the same base version.
 - The Codex marketplace installs the repository URL as the root plugin.
-- `gddy`, `storefront`, and `payments` validate independently.
+- `gddy`, `domains`, `hosting`, `storefront`, and `payments` validate independently.
 - No private, pre-release, configurable, or credential-bearing connection is
   present in tracked files.
-- MCP login, initialization, tool discovery, and representative read calls work
+- Domains MCP initialization, tool discovery, and representative public reads
+  work without login; Commerce MCP login and representative account reads work
   from each claimed host.
 - The reference storefront passes tests, typechecking, and production build.
 - A real checkout is never used merely as a release smoke test.
@@ -154,10 +177,11 @@ For each new capability:
 
 ## Near-term work
 
-1. Add the public Domains MCP server and implement the `domains` routing skill.
+1. Forward-test and refine the implemented `domains` skill across MCP, CLI, and
+   REST planning scenarios without executing a purchase or destructive change.
 2. Implement `godaddy-api` from the shared authentication and reliability docs.
-3. Implement `hosting` after resolving its missing public concepts and
-   authentication guides.
+3. Publish the missing Hosting concepts and authentication guides, then
+   reconcile `hosting` with any newly documented provisioning and status rules.
 4. Incorporate Commerce documentation as it is published and narrow any
    guidance that the live contract supersedes.
 5. Obtain and publish the GoDaddy platform-app contract before authoring

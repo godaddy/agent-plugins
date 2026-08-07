@@ -10,9 +10,10 @@ corpus contains 82 pages: 33 guides or concepts and 49 REST reference pages.
 
 The docs support Domains strongly, expose a coherent Node.js Hosting API,
 provide only two read-only Commerce transaction operations, and contain no
-dedicated GoDaddy platform-app documentation. The Node.js Hosting overview links to
-`/docs/hosting/concepts` and `/docs/hosting/authentication`; both currently
-return 404 and are release blockers for claiming a complete Hosting skill.
+dedicated GoDaddy platform-app documentation. The Node.js Hosting overview links
+to `/docs/hosting/concepts` and `/docs/hosting/authentication`; both currently
+return 404, so the implemented Hosting skill records those setup and semantic
+gaps instead of inventing guidance.
 
 ## Recommended structure
 
@@ -22,8 +23,8 @@ Use one root plugin and flat, independently triggerable skills:
 skills/
 ├── gddy/               production CLI operation
 ├── godaddy-api/        proposed shared REST integration workflow
-├── domains/            proposed domain outcomes across MCP, CLI, and REST
-├── hosting/            proposed Node.js hosting lifecycle
+├── domains/            implemented domain outcomes across MCP, CLI, and REST
+├── hosting/            existing Node.js hosting lifecycle
 ├── storefront/         existing Commerce shopper experience
 ├── payments/           existing Commerce payment boundary
 └── platform-apps/      future GoDaddy platform extensibility lifecycle
@@ -131,7 +132,7 @@ contract. Keep the four product areas as taxonomy, not directory nesting.
 
 ### Domains
 
-The public docs are sufficient for a production `domains` skill. Route public
+The public docs support the implemented production `domains` skill. Route public
 search and availability to the unauthenticated Domains MCP, interactive account
 work to `gddy`, and application integrations or CLI gaps to the current REST
 contract. Keep registration confirmation, quote expiry, idempotency, DNS
@@ -140,11 +141,12 @@ replacement semantics, and asynchronous operation polling in the main skill.
 ### Hosting
 
 The API forms one coherent lifecycle: create an app and poll its job, upload a
-zip and poll processing, manage preview or publish secrets, deploy, inspect
-status and logs, and roll back. It uses OAuth client credentials and operation-
-specific scopes. Author the skill after public client provisioning,
-authentication, and concepts guidance is available or explicitly document that
-those setup steps remain unsupported.
+ZIP and poll processing, manage preview or publish secrets, deploy, inspect
+status and logs, and roll back. The `hosting` skill captures all 15 operations,
+their OAuth scopes, schemas, variants, polling behavior, rate limits, and
+recovery rules. Public client provisioning and several status/value constraints
+remain unsupported because the linked authentication and concepts guides return
+404; the skill calls out those gaps explicitly.
 
 ### Commerce
 
@@ -169,10 +171,11 @@ for the extensibility model, not separate integration targets.
 ## Implementation order
 
 1. Import and correct `gddy` for production-only use.
-2. Add the public Domains MCP and implement `domains` with progressive
-   references for discovery/registration, DNS, and lifecycle management.
+2. Maintain and forward-test `domains` around the bundled public Domains MCP,
+   `gddy`, and current production REST contracts.
 3. Implement `godaddy-api` for direct REST integration and shared reliability.
-4. Resolve the two broken Hosting guide links, then implement `hosting`.
+4. Publish the two missing Hosting guides and reconcile the implemented
+   `hosting` skill with any additional contract details.
 5. Reconcile Commerce skills with forthcoming public documentation.
 6. Obtain and publish the GoDaddy platform-app contract, then implement
    `platform-apps` against that public production surface.

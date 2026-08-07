@@ -9,8 +9,9 @@ const marketplaceName = "godaddy-ai-toolkit";
 const repositoryUrl = "https://github.com/godaddy/commerce-agent-plugin";
 const repositoryGitUrl = `${repositoryUrl}.git`;
 const commerceMcpUrl = "https://mcp.commerce.api.godaddy.com/mcp";
+const domainsMcpUrl = "https://api.godaddy.com/v1/domains/mcp";
 const oauthClientId = "39489dee-4103-4284-9aab-9f2452142bce";
-const requiredSkills = new Set(["gddy", "payments", "storefront"]);
+const requiredSkills = new Set(["domains", "gddy", "hosting", "payments", "storefront"]);
 const expectedScopes = [
   "openid",
   "profile",
@@ -214,33 +215,69 @@ async function validateMcp() {
   const expectedMcpSchema = "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json";
   if (portable.$schema !== expectedMcpSchema) fail("mcp.json uses a non-canonical schema.");
 
-  const portableServers = Object.entries(portable.mcpServers ?? {});
-  if (portableServers.length !== 1 || portableServers[0]?.[0] !== "commerce") {
-    fail("mcp.json must declare only the commerce MCP server.");
+  const expectedServerNames = ["godaddy-commerce", "godaddy-domains"];
+  const portableServerNames = Object.keys(portable.mcpServers ?? {}).sort();
+  if (JSON.stringify(portableServerNames) !== JSON.stringify(expectedServerNames)) {
+    fail("mcp.json must declare the godaddy-commerce and godaddy-domains MCP servers.");
   }
-  const portableServer = portable.mcpServers?.commerce;
-  if (portableServer?.type !== "streamable-http" || portableServer?.url !== commerceMcpUrl) {
+  const portableCommerceServer = portable.mcpServers?.["godaddy-commerce"];
+  if (
+    portableCommerceServer?.type !== "streamable-http"
+    || portableCommerceServer?.url !== commerceMcpUrl
+  ) {
     fail("mcp.json must use the production Commerce Streamable HTTP endpoint.");
   }
-  assertNoCredentialMaterial(portableServer, "mcp.json commerce server");
-
-  const codexServers = Object.entries(codex.mcpServers ?? {});
-  if (codexServers.length !== 1 || codexServers[0]?.[0] !== "commerce") {
-    fail(".mcp.json must declare only the commerce MCP server.");
+  assertNoCredentialMaterial(portableCommerceServer, "mcp.json godaddy-commerce server");
+  const portableDomainsServer = portable.mcpServers?.["godaddy-domains"];
+  if (
+    portableDomainsServer?.type !== "streamable-http"
+    || portableDomainsServer?.url !== domainsMcpUrl
+  ) {
+    fail("mcp.json must use the public Domains Streamable HTTP endpoint.");
   }
-  const server = codex.mcpServers?.commerce;
-  if (server?.type !== "http" || server?.url !== commerceMcpUrl) {
+  if (
+    JSON.stringify(Object.keys(portableDomainsServer ?? {}).sort())
+    !== JSON.stringify(["type", "url"])
+  ) {
+    fail("The portable godaddy-domains MCP server may configure only type and url.");
+  }
+  assertNoCredentialMaterial(portableDomainsServer, "mcp.json godaddy-domains server");
+
+  const codexServerNames = Object.keys(codex.mcpServers ?? {}).sort();
+  if (JSON.stringify(codexServerNames) !== JSON.stringify(expectedServerNames)) {
+    fail(".mcp.json must declare the godaddy-commerce and godaddy-domains MCP servers.");
+  }
+  const commerceServer = codex.mcpServers?.["godaddy-commerce"];
+  if (commerceServer?.type !== "http" || commerceServer?.url !== commerceMcpUrl) {
     fail(".mcp.json must use the production Commerce HTTP endpoint.");
   }
-  if (server?.oauth_resource !== commerceMcpUrl) fail("Commerce oauth_resource must match its MCP URL.");
-  if (server?.oauth?.client_id !== oauthClientId) fail("Commerce must use the registered public OAuth client.");
-  if (server?.oauth && Object.keys(server.oauth).some((field) => field !== "client_id")) {
+  if (commerceServer?.oauth_resource !== commerceMcpUrl) {
+    fail("Commerce oauth_resource must match its MCP URL.");
+  }
+  if (commerceServer?.oauth?.client_id !== oauthClientId) {
+    fail("Commerce must use the registered public OAuth client.");
+  }
+  if (
+    commerceServer?.oauth
+    && Object.keys(commerceServer.oauth).some((field) => field !== "client_id")
+  ) {
     fail("Commerce may configure only oauth.client_id.");
   }
-  if (JSON.stringify(server?.scopes) !== JSON.stringify(expectedScopes)) {
+  if (JSON.stringify(commerceServer?.scopes) !== JSON.stringify(expectedScopes)) {
     fail("Commerce must use the provisioned read-only OAuth scopes.");
   }
-  assertNoCredentialMaterial(server, ".mcp.json commerce server");
+  assertNoCredentialMaterial(commerceServer, ".mcp.json godaddy-commerce server");
+  const domainsServer = codex.mcpServers?.["godaddy-domains"];
+  if (domainsServer?.type !== "http" || domainsServer?.url !== domainsMcpUrl) {
+    fail(".mcp.json must use the public Domains HTTP endpoint.");
+  }
+  if (
+    JSON.stringify(Object.keys(domainsServer ?? {}).sort())
+    !== JSON.stringify(["type", "url"])
+  ) {
+    fail("The Codex godaddy-domains MCP server may configure only type and url.");
+  }
+  assertNoCredentialMaterial(domainsServer, ".mcp.json godaddy-domains server");
 }
 
 async function validateSkills() {
@@ -291,7 +328,7 @@ async function validateInstallationDocs() {
   const commands = [
     `codex plugin marketplace add ${repositoryGitUrl}`,
     `codex plugin add ${pluginName}@${marketplaceName}`,
-    "codex mcp login commerce",
+    "codex mcp login godaddy-commerce",
   ];
   for (const command of commands) {
     if (!readme.includes(command)) fail(`README.md must document: ${command}`);

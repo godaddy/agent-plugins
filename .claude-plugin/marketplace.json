@@ -10,7 +10,7 @@
     {
       "name": "godaddy",
       "source": "./",
-      "description": "Build GoDaddy-powered experiences with Domains CLI, storefront, and payments skills.",
+      "description": "Build GoDaddy-powered experiences with Domains, Node.js Hosting, storefront, and payments skills.",
       "version": "0.1.0",
       "author": {
         "name": "GoDaddy"
@@ -21,6 +21,9 @@
         "domains",
         "dns",
         "cli",
+        "hosting",
+        "nodejs",
+        "deployment",
         "commerce",
         "storefront",
         "payments",
